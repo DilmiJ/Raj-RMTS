@@ -10,7 +10,7 @@ const Assemble = () => {
   const [netAmount, setNetAmount] = useState(0);
   const [activeButton, setActiveButton] = useState(null);
   const [isPasswordCorrect, setIsPasswordCorrect] = useState(false);
-  
+
   // Generate and store the invoice number only once using useRef
   const invoiceNumberRef = useRef(uuidv4().slice(0, 8));
 
@@ -108,6 +108,24 @@ const Assemble = () => {
     setNetAmount(newTotal - (newTotal * discount) / 100);
   };
 
+  // Function to create a string or JSON that includes all the items and the invoice details
+  const generateQRCodeValue = () => {
+    const data = {
+      invoiceNumber: invoiceNumberRef.current,
+      items: quotationItems.map((item) => ({
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        total: item.price * item.quantity,
+      })),
+      totalAmount,
+      discount,
+      netAmount,
+    };
+
+    return JSON.stringify(data);
+  };
+
   return (
     <div className="assemble-container">
       <div className="content">
@@ -142,8 +160,8 @@ const Assemble = () => {
             <div className="invoice-number">Invoice: {invoiceNumberRef.current}</div>
           </div>
           <div className="invoice-section">
-            {/* QR code displaying the invoice number */}
-            <QRCodeCanvas value={invoiceNumberRef.current} size={64} className="qr-code" />
+            {/* QR code displaying the invoice number and items */}
+            <QRCodeCanvas value={generateQRCodeValue()} size={128} className="qr-code" />
           </div>
           <table>
             <thead>
