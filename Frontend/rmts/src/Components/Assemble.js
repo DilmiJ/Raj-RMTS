@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import '../css/Assemble.css';
 import { v4 as uuidv4 } from 'uuid'; // For generating unique invoice numbers
 import { QRCodeCanvas } from 'qrcode.react'; // Use QRCodeCanvas instead of QRCode
@@ -11,8 +11,8 @@ const Assemble = () => {
   const [activeButton, setActiveButton] = useState(null);
   const [isPasswordCorrect, setIsPasswordCorrect] = useState(false);
 
-  // Generate unique invoice number
-  const invoiceNumber = uuidv4().slice(0, 8); // Example invoice number (8 characters)
+  // Generate and store the invoice number only once using useRef
+  const invoiceNumberRef = useRef(uuidv4().slice(0, 8));
 
   const handleAddItem = (item) => {
     const newItems = [...quotationItems, item];
@@ -52,7 +52,6 @@ const Assemble = () => {
     setActiveButton(activeButton === buttonNumber ? null : buttonNumber);
   };
 
-  // Sub-buttons for each of the main buttons (No1 to No5)
   const subButtons = {
     1: [
       { name: 'Item 1.1', price: 50, quantity: 1 },
@@ -109,6 +108,24 @@ const Assemble = () => {
     setNetAmount(newTotal - (newTotal * discount) / 100);
   };
 
+  // Function to create a string or JSON that includes all the items and the invoice details
+  const generateQRCodeValue = () => {
+    const data = {
+      invoiceNumber: invoiceNumberRef.current,
+      items: quotationItems.map((item) => ({
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        total: item.price * item.quantity,
+      })),
+      totalAmount,
+      discount,
+      netAmount,
+    };
+
+    return JSON.stringify(data);
+  };
+
   return (
     <div className="assemble-container">
       <div className="content">
@@ -140,11 +157,11 @@ const Assemble = () => {
         <div className="quotation-panel">
           <div className="quotation-header">
             <h3>Quotation</h3>
-            <div className="invoice-number">Invoice: {invoiceNumber}</div>
+            <div className="invoice-number">Invoice: {invoiceNumberRef.current}</div>
           </div>
           <div className="invoice-section">
-            {/* QR code displaying the invoice number */}
-            <QRCodeCanvas value={invoiceNumber} size={64} className="qr-code" />
+            {/* QR code displaying the invoice number and items */}
+            <QRCodeCanvas value={generateQRCodeValue()} size={128} className="qr-code" />
           </div>
           <table>
             <thead>
@@ -174,7 +191,7 @@ const Assemble = () => {
           {/* Show the discount amount below total if password is correct */}
           {isPasswordCorrect && <h3>Discount: {discount}%</h3>}
           <h3>Net Amount: ${netAmount}</h3>
-          
+
           {/* Apply Discount and Delete buttons below Net Amount */}
           <div className="actions">
             <button onClick={handleApplyDiscount}>% Apply Discount</button>
