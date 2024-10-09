@@ -16,41 +16,98 @@ const JobSelection = () => {
   };
 
   return (
-    <div className="job-selection-container">
-      <div className="button-container">
-        <button className="square-button job-button" onClick={handleShowJobForm}>
+    <div style={styles.jobSelectionContainer}>
+      <div style={styles.buttonContainer}>
+        <button style={styles.squareButton} onClick={handleShowJobForm}>
           Job Details
         </button>
-        <button className="square-button item-button" onClick={handleShowItemForm}>
+        <button style={styles.squareButton} onClick={handleShowItemForm}>
           Item Details
         </button>
       </div>
 
       {showJobForm && (
-        <div className="form-container">
+        <div style={styles.formContainer}>
           <h3>Job Scheduling Form</h3>
           <form>
-            <input type="text" placeholder="Job Title" required />
-            <input type="text" placeholder="Worker Name" required />
-            <input type="date" required />
-            <button type="submit" className="submit-button">Submit</button>
+            <input style={styles.input} type="text" placeholder="Name" required />
+            <input style={styles.input} type="text" placeholder="Job Number" required />
+            <input style={styles.input} type="text" placeholder="User ID Number" required />
+            <input style={styles.input} type="date" placeholder="Receiving Date" required />
+            <input style={styles.input} type="date" placeholder="Delivery Date" required />
+            <input style={styles.input} type="date" placeholder="Workout Date" required />
+            <button type="submit" style={styles.submitButton}>Submit</button>
           </form>
         </div>
       )}
 
       {showItemForm && (
-        <div className="form-container">
+        <div style={styles.formContainer}>
           <h3>Item Form</h3>
           <form>
-            <input type="text" placeholder="Item Name" required />
-            <input type="number" placeholder="Quantity" required />
-            <input type="text" placeholder="Price" required />
-            <button type="submit" className="submit-button">Submit</button>
+            <input style={styles.input} type="text" placeholder="Machine Type" required />
+            <input style={styles.input} type="text" placeholder="Machine Model Number" required />
+            <input style={styles.input} type="text" placeholder="Manufacture Country" required />
+            <input style={styles.input} type="text" placeholder="Serial Number" required />
+            <button type="submit" style={styles.submitButton}>Submit</button>
           </form>
         </div>
       )}
     </div>
   );
+};
+
+const styles = {
+  jobSelectionContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100vh',
+    backgroundColor: 'black',
+    color: 'white',
+    fontFamily: 'Arial, sans-serif',
+  },
+  buttonContainer: {
+    marginBottom: '20px',
+  },
+  squareButton: {
+    backgroundColor: 'gray',
+    color: 'white',
+    border: 'none',
+    padding: '10px 20px',
+    margin: '0 10px',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s',
+  },
+  submitButton: {
+    backgroundColor: 'orange',
+    color: 'white',
+    border: 'none',
+    padding: '10px 20px',
+    marginTop: '10px',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s',
+  },
+  formContainer: {
+    backgroundColor: 'darkgray',
+    padding: '20px',
+    borderRadius: '5px',
+    width: '300px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  input: {
+    marginBottom: '10px',
+    padding: '8px',
+    borderRadius: '5px',
+    border: '1px solid gray',
+    width: '100%',
+    boxSizing: 'border-box',
+  },
 };
 
 export default JobSelection;

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../css/CustomerDetails.css';
+import { FaKeyboard } from 'react-icons/fa';
 
 const CustomerDetails = () => {
   const [formData, setFormData] = useState({
@@ -19,30 +20,15 @@ const CustomerDetails = () => {
 
   const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.customerName.trim()) {
+    const nameRegex = /^[a-zA-Z\s]*$/; // Only letters and spaces
+    if (!formData.customerName) {
       newErrors.customerName = 'Customer name is required';
-    } else if (formData.customerName.length < 3) {
-      newErrors.customerName = 'Customer name should be at least 3 characters';
+    } else if (!nameRegex.test(formData.customerName)) {
+      newErrors.customerName = 'Customer name cannot contain numbers or symbols';
     }
 
-    if (!formData.address.trim()) {
-      newErrors.address = 'Address is required';
-    }
-
-    const phonePattern = /^[0-9]{10}$/;
     if (!formData.mobileNumber && !formData.alternateNumber) {
       newErrors.mobileNumber = 'At least one phone number is required';
-    } else if (formData.mobileNumber && !phonePattern.test(formData.mobileNumber)) {
-      newErrors.mobileNumber = 'Mobile number should be a valid 10-digit number';
-    }
-
-    if (formData.alternateNumber && !phonePattern.test(formData.alternateNumber)) {
-      newErrors.alternateNumber = 'Alternate number should be a valid 10-digit number';
-    }
-
-    if (formData.whatsappNumber && !phonePattern.test(formData.whatsappNumber)) {
-      newErrors.whatsappNumber = 'WhatsApp number should be a valid 10-digit number';
     }
 
     setErrors(newErrors);
@@ -54,7 +40,7 @@ const CustomerDetails = () => {
 
     if (validateForm()) {
       console.log('Form submitted:', formData);
-      // You can add the logic to handle form submission here
+      // Add form submission logic here
     }
   };
 
@@ -62,68 +48,68 @@ const CustomerDetails = () => {
     <div className="customer-details-container">
       <h2>Customer Details</h2>
       <form onSubmit={handleSubmit} className="customer-form">
-        <div className="form-group">
-          <label>Customer Name</label>
-          <input
-            type="text"
-            name="customerName"
-            value={formData.customerName}
-            onChange={handleInputChange}
-            className={errors.customerName ? 'error-input' : ''}
-          />
-          {errors.customerName && <span className="error">{errors.customerName}</span>}
+        <div className="form-row">
+          <div className="form-group">
+            <label>Customer Name</label>
+            <input
+              type="text"
+              name="customerName"
+              value={formData.customerName}
+              onChange={handleInputChange}
+              className={errors.customerName ? 'error-input' : ''}
+            />
+            {errors.customerName && <span className="error">{errors.customerName}</span>}
+          </div>
+
+          <div className="form-group">
+            <label>Address</label>
+            <input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+            />
+          </div>
         </div>
 
-        <div className="form-group">
-          <label>Address</label>
-          <input
-            type="text"
-            name="address"
-            value={formData.address}
-            onChange={handleInputChange}
-            className={errors.address ? 'error-input' : ''}
-          />
-          {errors.address && <span className="error">{errors.address}</span>}
+        <div className="form-row">
+          <div className="form-group">
+            <label>Mobile Number</label>
+            <input
+              type="text"
+              name="mobileNumber"
+              value={formData.mobileNumber}
+              onChange={handleInputChange}
+              className={errors.mobileNumber ? 'error-input' : ''}
+            />
+            {errors.mobileNumber && <span className="error">{errors.mobileNumber}</span>}
+          </div>
+
+          <div className="form-group">
+            <label>Alternate Number</label>
+            <input
+              type="text"
+              name="alternateNumber"
+              value={formData.alternateNumber}
+              onChange={handleInputChange}
+            />
+          </div>
         </div>
 
-        <div className="form-group">
-          <label>Mobile Number</label>
-          <input
-            type="text"
-            name="mobileNumber"
-            value={formData.mobileNumber}
-            onChange={handleInputChange}
-            className={errors.mobileNumber ? 'error-input' : ''}
-          />
-          {errors.mobileNumber && <span className="error">{errors.mobileNumber}</span>}
-        </div>
-
-        <div className="form-group">
-          <label>Alternate Number</label>
-          <input
-            type="text"
-            name="alternateNumber"
-            value={formData.alternateNumber}
-            onChange={handleInputChange}
-            className={errors.alternateNumber ? 'error-input' : ''}
-          />
-          {errors.alternateNumber && <span className="error">{errors.alternateNumber}</span>}
-        </div>
-
-        <div className="form-group">
-          <label>WhatsApp Number</label>
-          <input
-            type="text"
-            name="whatsappNumber"
-            value={formData.whatsappNumber}
-            onChange={handleInputChange}
-            className={errors.whatsappNumber ? 'error-input' : ''}
-          />
-          {errors.whatsappNumber && <span className="error">{errors.whatsappNumber}</span>}
+        <div className="form-row">
+          <div className="form-group">
+            <label>WhatsApp Number</label>
+            <input
+              type="text"
+              name="whatsappNumber"
+              value={formData.whatsappNumber}
+              onChange={handleInputChange}
+            />
+          </div>
         </div>
 
         <button type="submit" className="submit-button">
-          Submit
+          <FaKeyboard className="submit-icon" /> Submit
         </button>
       </form>
     </div>
