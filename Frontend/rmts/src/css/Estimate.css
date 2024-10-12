@@ -1,0 +1,45 @@
+.estimate-container {
+    width: 60%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f0f8ff;
+    border-radius: 10px;
+  }
+  
+  .quotation-section p {
+    font-size: 18px;
+    margin: 10px 0;
+  }
+  
+  .quotation-section strong {
+    font-weight: bold;
+  }
+  
+  .action-buttons {
+    margin-top: 30px;
+    text-align: center;
+  }
+  
+  .accept-button, .reject-button {
+    padding: 10px 20px;
+    font-size: 18px;
+    margin: 0 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .accept-button {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .reject-button {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .icon {
+    margin-right: 5px;
+  }
+  

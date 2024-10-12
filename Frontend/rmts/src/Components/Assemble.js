@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
 import '../css/Assemble.css';
-import { v4 as uuidv4 } from 'uuid'; // For generating unique invoice numbers
-import { QRCodeCanvas } from 'qrcode.react'; // Use QRCodeCanvas instead of QRCode
-import { useNavigate } from 'react-router-dom'; // For navigation
+import { v4 as uuidv4 } from 'uuid';
+import { QRCodeCanvas } from 'qrcode.react';
+import { useNavigate } from 'react-router-dom';
 
 const Assemble = () => {
   const [quotationItems, setQuotationItems] = useState([]);
@@ -11,10 +11,17 @@ const Assemble = () => {
   const [netAmount, setNetAmount] = useState(0);
   const [activeButton, setActiveButton] = useState(null);
   const [isPasswordCorrect, setIsPasswordCorrect] = useState(false);
+  const [showCustomForm, setShowCustomForm] = useState(false);
+  const [formData, setFormData] = useState({
+    itemName: '',
+    itemNumber: '',
+    stockAvailable: '',
+    specification: '',
+    quantity: 1,
+    images: [],
+  });
 
-  const navigate = useNavigate(); // Initialize useNavigate for routing
-
-  // Generate and store the invoice number
+  const navigate = useNavigate();
   const invoiceNumberRef = useRef(uuidv4().slice(0, 8));
 
   const handleAddItem = (item) => {
@@ -29,8 +36,8 @@ const Assemble = () => {
     setQuotationItems([]);
     setTotalAmount(0);
     setNetAmount(0);
-    setDiscount(0); // Reset discount as well
-    setIsPasswordCorrect(false); // Reset password check
+    setDiscount(0);
+    setIsPasswordCorrect(false);
   };
 
   const handleApplyDiscount = () => {
@@ -38,15 +45,13 @@ const Assemble = () => {
     if (enteredPassword === '12345') {
       setIsPasswordCorrect(true);
       const discountValue = prompt('Enter the discount percentage:');
-      const discountPercentage = parseFloat(discountValue) || 0; // Ensure it's a number
+      const discountPercentage = parseFloat(discountValue) || 0;
       setDiscount(discountPercentage);
-
-      // Update net amount after discount is applied
       const newNetAmount = totalAmount - (totalAmount * discountPercentage) / 100;
       setNetAmount(newNetAmount);
     } else {
       alert('Invalid password! Please try again.');
-      setIsPasswordCorrect(false); // Reset if the password is incorrect
+      setIsPasswordCorrect(false);
     }
   };
 
@@ -110,6 +115,54 @@ const Assemble = () => {
     setNetAmount(newTotal - (newTotal * discount) / 100);
   };
 
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    const validImages = files.filter(file =>
+      file.type === 'image/png' || file.type === 'image/jpeg'
+    );
+
+    if (validImages.length > 0) {
+      setFormData((prev) => ({ ...prev, images: validImages }));
+    } else {
+      alert('Please upload at least one PNG or JPEG image.');
+    }
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+
+    // Validation for required fields
+    if (!formData.itemName || !formData.itemNumber || !formData.stockAvailable || !formData.specification || formData.images.length === 0) {
+      alert('Please fill in all fields and upload at least one image.');
+      return;
+    }
+
+    const customItem = {
+      name: formData.itemName,
+      price: 0, // Set default price for custom item
+      quantity: formData.quantity,
+      specifications: formData.specification,
+      stockAvailable: formData.stockAvailable,
+      images: formData.images,
+    };
+    handleAddItem(customItem);
+
+    setFormData({
+      itemName: '',
+      itemNumber: '',
+      stockAvailable: '',
+      specification: '',
+      quantity: 1,
+      images: [],
+    });
+    setShowCustomForm(false);
+  };
+
   const generateQRCodeValue = () => {
     const data = {
       invoiceNumber: invoiceNumberRef.current,
@@ -130,19 +183,16 @@ const Assemble = () => {
   return (
     <div className="assemble-container">
       <div className="content">
-        {/* Button panel on the left side */}
         <div className="button-panel">
           <div className="button-group">
             {Array.from({ length: 5 }, (_, index) => (
               <div key={index + 1}>
-                {/* Main buttons No1 to No5 with icons */}
                 <button onClick={() => handleButtonClick(index + 1)}>
                   <i className="fas fa-plug"></i> No {index + 1}
                 </button>
                 {activeButton === index + 1 && (
                   <div className="sub-button-group">
-                    {/* Sub-buttons for each main button with icons */}
-                    {subButtons[index + 1].map((item, subIndex) => (
+                    {subButtons[index + 1] && subButtons[index + 1].map((item, subIndex) => (
                       <button key={subIndex} onClick={() => handleAddItem(item)}>
                         <i className="fas fa-cog"></i> {item.name} - ${item.price}
                       </button>
@@ -151,17 +201,20 @@ const Assemble = () => {
                 )}
               </div>
             ))}
+            <div>
+              <button onClick={() => setShowCustomForm(true)}>
+                <i className="fas fa-plus"></i> +
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Quotation panel on the right side */}
         <div className="quotation-panel">
           <div className="quotation-header">
             <h3>Quotation</h3>
             <div className="invoice-number">Invoice: {invoiceNumberRef.current}</div>
           </div>
           <div className="invoice-section">
-            {/* QR code displaying the invoice number and items */}
             <QRCodeCanvas value={generateQRCodeValue()} size={128} className="qr-code" />
           </div>
           <table>
@@ -177,44 +230,78 @@ const Assemble = () => {
               {quotationItems.map((item, index) => (
                 <tr key={index}>
                   <td>{item.name}</td>
-                  <td>{item.quantity}</td>
-                  <td>${item.price * item.quantity}</td>
                   <td>
-                    <button onClick={() => handleDecrementQuantity(index)}>-</button>
-                    <button onClick={() => handleIncrementQuantity(index)}>+</button>
-                    <button onClick={() => handleDeleteItem(index)}>🗑️</button>
+                    <div className="quantity-controls">
+                      <button onClick={() => handleDecrementQuantity(index)}>-</button>
+                      {item.quantity}
+                      <button onClick={() => handleIncrementQuantity(index)}>+</button>
+                    </div>
+                  </td>
+                  <td>${(item.price * item.quantity).toFixed(2)}</td>
+                  <td>
+                    <button onClick={() => handleDeleteItem(index)}>
+                      <i className="fas fa-trash"></i>
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <h3>Total: ${totalAmount}</h3>
-          {/* Show the discount amount below total if password is correct */}
-          {isPasswordCorrect && <h3>Discount: {discount}%</h3>}
-          <h3>Net Amount: ${netAmount}</h3>
-
-          {/* Apply Discount and Delete buttons below Net Amount */}
-          <div className="actions">
-            <button onClick={handleApplyDiscount}>% Apply Discount</button>
-            <button className="delete-button" onClick={handleDeleteQuotation}>
-              🗑️ Delete All
-            </button>
+          <div className="totals">
+            <p>Total Amount: ${totalAmount.toFixed(2)}</p>
+            {isPasswordCorrect && (
+              <div>
+                <p>Discount: {discount}%</p>
+                <p>Net Amount: ${netAmount.toFixed(2)}</p>
+              </div>
+            )}
           </div>
-
-          {/* New buttons for Customer and Job Section with routing */}
-          <div className="additional-buttons">
-            <button className="customer-button" onClick={() => navigate('/customer-details')}>
-              <i className="fas fa-user"></i> Customer Details
+          <div className="quotation-actions">
+            <button onClick={handleApplyDiscount}>
+              Apply Discount
             </button>
-            <button className="job-button" onClick={() => navigate('/job-selection')}>
-              <i className="fas fa-briefcase"></i> Job Section
+            <button onClick={handleDeleteQuotation}>
+              Clear Quotation
             </button>
           </div>
         </div>
+
+        {showCustomForm && (
+          <div className="custom-form">
+            <h3>Add Custom Item</h3>
+            <form onSubmit={handleFormSubmit}>
+              <label>
+                Item Name:
+                <input type="text" name="itemName" value={formData.itemName} onChange={handleFormChange} required />
+              </label>
+              <label>
+                Item Number:
+                <input type="text" name="itemNumber" value={formData.itemNumber} onChange={handleFormChange} required />
+              </label>
+              <label>
+                Stock Available:
+                <input type="number" name="stockAvailable" value={formData.stockAvailable} onChange={handleFormChange} required />
+              </label>
+              <label>
+                Specifications:
+                <textarea name="specification" value={formData.specification} onChange={handleFormChange} required />
+              </label>
+              <label>
+                Quantity:
+                <input type="number" name="quantity" value={formData.quantity} onChange={handleFormChange} min="1" required />
+              </label>
+              <label>
+                Images:
+                <input type="file" multiple accept="image/png, image/jpeg" onChange={handleImageChange} required />
+              </label>
+              <button type="submit">Add Item</button>
+              <button type="button" onClick={() => setShowCustomForm(false)}>Cancel</button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
-
 };
 
 export default Assemble;

@@ -1,99 +1,73 @@
 .customer-details-container {
-    background: url('https://example.com/your-background-image.jpg') no-repeat center center fixed; /* Background image */
-    background-size: cover; /* Cover the entire area */
-    color: #e0e0e0; /* Light text color */
-    padding: 40px;
-    border-radius: 8px;
-    width: 450px;
-    margin: 50px auto;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
-  }
-  
-  h2 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #e6c42d; /* Highlight color for title */
-    font-family: 'Arial', sans-serif; /* Attractive font */
-  }
-  
-  .customer-form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .form-row {
-    display: flex; /* Align form groups in a row */
-    justify-content: space-between; /* Space between groups */
-    margin-bottom: 15px; /* Space between rows */
-  }
-  
-  .form-group {
-    flex: 1; /* Allow form groups to grow */
-    margin-right: 10px; /* Space between fields */
-  }
-  
-  .form-group:last-child {
-    margin-right: 0; /* Remove margin for the last item */
-  }
-  
-  label {
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #e6e2d7; /* Label color */
-  }
-  
-  input {
-    padding: 10px;
-    border: 1px solid #e7e5e5; /* Darker border */
-    border-radius: 4px;
-    background-color: #1e1e1e; /* Input background */
-    color: #e0e0e0; /* Input text color */
-    width: 100%; /* Full width */
-  }
-  
-  input.error-input {
-    border-color: #ff4444; /* Red border for error */
-  }
-  
-  .error {
-    color: #ff4444; /* Error message color */
-    font-size: 0.8em;
-  }
-  
-  .submit-button {
-    padding: 10px;
-    border: none;
-    border-radius: 4px;
-    background-color: #bda531; /* Button color */
-    color: #121212; /* Button text color */
-    cursor: pointer;
-    display: flex;
-    align-items: center; /* Align icon and text */
-    justify-content: center;
-    transition: background-color 0.3s ease;
-    font-weight: bold; /* Make button text bold */
-  }
-  
-  .submit-button:hover {
-    background-color: #e6b800; /* Darker button on hover */
-  }
-  
-  .submit-icon {
-    margin-right: 5px; /* Space between icon and text */
-  }
-  
-  /* Responsive Design */
-  @media (max-width: 500px) {
-    .customer-details-container {
-      width: 90%; /* Full width on small screens */
-    }
-    
-    .form-row {
-      flex-direction: column; /* Stack inputs on small screens */
-    }
-  
-    .form-group {
-      margin-right: 0; /* Remove right margin for stacking */
-    }
-  }
-  
+  background-color: #1a1a1a; /* Dark background */
+  color: #ffffff; /* White text */
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 500px; /* Centering content */
+  margin: 0 auto; /* Centering container */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h2, h3 {
+  color: #ff6600; /* Orange headers */
+  text-align: center;
+}
+
+.customer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Spacing between form groups */
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  color: #ff6600; /* Orange labels */
+  margin-bottom: 5px;
+}
+
+input {
+  padding: 10px;
+  border: 1px solid #666666; /* Gray border */
+  border-radius: 4px;
+  background-color: #333333; /* Dark background for inputs */
+  color: #ffffff; /* White text */
+}
+
+input.readonly-input {
+  background-color: #444444; /* Darker background for readonly field */
+  cursor: not-allowed; /* Not editable */
+}
+
+input.error-input {
+  border-color: #ff3300; /* Red border on error */
+}
+
+.error {
+  color: #ff3300; /* Red error text */
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.submit-button {
+  background-color: #003366; /* Dark blue button */
+  color: #ffffff; /* White text */
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submit-icon {
+  margin-right: 8px;
+}
+
+.submit-button:hover {
+  background-color: #002244; /* Darker blue on hover */
+}
