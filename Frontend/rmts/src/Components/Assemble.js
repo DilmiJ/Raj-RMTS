@@ -21,7 +21,7 @@ const Assemble = () => {
     images: [],
   });
 
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Use navigate to redirect to different routes
   const invoiceNumberRef = useRef(uuidv4().slice(0, 8));
 
   const handleAddItem = (item) => {
@@ -180,6 +180,10 @@ const Assemble = () => {
     return JSON.stringify(data);
   };
 
+  const navigateToCustomerDetails = () => {
+    navigate('/customer-details'); // Redirect to CustomerDetails page
+  };
+
   return (
     <div className="assemble-container">
       <div className="content">
@@ -210,18 +214,15 @@ const Assemble = () => {
         </div>
 
         <div className="quotation-panel">
-          <div className="quotation-header">
-            <h3>Quotation</h3>
-            <div className="invoice-number">Invoice: {invoiceNumberRef.current}</div>
-          </div>
-          <div className="invoice-section">
-            <QRCodeCanvas value={generateQRCodeValue()} size={128} className="qr-code" />
-          </div>
-          <table>
+          <h3>Quotation No: {invoiceNumberRef.current}</h3>
+          <QRCodeCanvas value={generateQRCodeValue()} size={128} />
+
+          <table className="quotation-table">
             <thead>
               <tr>
-                <th>Product</th>
+                <th>Item Name</th>
                 <th>Quantity</th>
+                <th>Price</th>
                 <th>Total</th>
                 <th>Actions</th>
               </tr>
@@ -231,12 +232,11 @@ const Assemble = () => {
                 <tr key={index}>
                   <td>{item.name}</td>
                   <td>
-                    <div className="quantity-controls">
-                      <button onClick={() => handleDecrementQuantity(index)}>-</button>
-                      {item.quantity}
-                      <button onClick={() => handleIncrementQuantity(index)}>+</button>
-                    </div>
+                    <button onClick={() => handleDecrementQuantity(index)}>-</button>
+                    {item.quantity}
+                    <button onClick={() => handleIncrementQuantity(index)}>+</button>
                   </td>
+                  <td>${item.price.toFixed(2)}</td>
                   <td>${(item.price * item.quantity).toFixed(2)}</td>
                   <td>
                     <button onClick={() => handleDeleteItem(index)}>
@@ -247,55 +247,89 @@ const Assemble = () => {
               ))}
             </tbody>
           </table>
-          <div className="totals">
-            <p>Total Amount: ${totalAmount.toFixed(2)}</p>
-            {isPasswordCorrect && (
-              <div>
-                <p>Discount: {discount}%</p>
-                <p>Net Amount: ${netAmount.toFixed(2)}</p>
-              </div>
-            )}
+          <div className="totals-section">
+            <p>Total: ${totalAmount.toFixed(2)}</p>
+            <p>Discount: {discount}%</p>
+            <p>Net Amount: ${netAmount.toFixed(2)}</p>
           </div>
           <div className="quotation-actions">
-            <button onClick={handleApplyDiscount}>
+            <button className="apply-discount-button" onClick={handleApplyDiscount}>
               Apply Discount
             </button>
-            <button onClick={handleDeleteQuotation}>
-              Clear Quotation
+            <button className="delete-quotation-button" onClick={handleDeleteQuotation}>
+              Delete Quotation
+            </button>
+            <button className="customer-details-button" onClick={navigateToCustomerDetails}>
+              Customer Details
             </button>
           </div>
         </div>
 
         {showCustomForm && (
-          <div className="custom-form">
-            <h3>Add Custom Item</h3>
+          <div className="custom-item-form">
+            <h4>Add Custom Item</h4>
             <form onSubmit={handleFormSubmit}>
               <label>
                 Item Name:
-                <input type="text" name="itemName" value={formData.itemName} onChange={handleFormChange} required />
+                <input
+                  type="text"
+                  name="itemName"
+                  value={formData.itemName}
+                  onChange={handleFormChange}
+                  required
+                />
               </label>
               <label>
                 Item Number:
-                <input type="text" name="itemNumber" value={formData.itemNumber} onChange={handleFormChange} required />
+                <input
+                  type="text"
+                  name="itemNumber"
+                  value={formData.itemNumber}
+                  onChange={handleFormChange}
+                  required
+                />
               </label>
               <label>
                 Stock Available:
-                <input type="number" name="stockAvailable" value={formData.stockAvailable} onChange={handleFormChange} required />
+                <input
+                  type="text"
+                  name="stockAvailable"
+                  value={formData.stockAvailable}
+                  onChange={handleFormChange}
+                  required
+                />
               </label>
               <label>
-                Specifications:
-                <textarea name="specification" value={formData.specification} onChange={handleFormChange} required />
+                Specification:
+                <textarea
+                  name="specification"
+                  value={formData.specification}
+                  onChange={handleFormChange}
+                  required
+                />
               </label>
               <label>
                 Quantity:
-                <input type="number" name="quantity" value={formData.quantity} onChange={handleFormChange} min="1" required />
+                <input
+                  type="number"
+                  name="quantity"
+                  value={formData.quantity}
+                  onChange={handleFormChange}
+                  min="1"
+                  required
+                />
               </label>
               <label>
-                Images:
-                <input type="file" multiple accept="image/png, image/jpeg" onChange={handleImageChange} required />
+                Upload Images:
+                <input
+                  type="file"
+                  multiple
+                  accept=".png, .jpeg, .jpg"
+                  onChange={handleImageChange}
+                  required
+                />
               </label>
               <button type="submit">Add Item</button>
-              <button type="button" onClick={() => setShowCustomForm(false)}>Cancel</button>
             </form>
           </div>
         )}
