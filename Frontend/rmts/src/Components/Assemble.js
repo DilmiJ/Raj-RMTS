@@ -27,9 +27,7 @@ const Assemble = () => {
   const handleAddItem = (item) => {
     const newItems = [...quotationItems, item];
     setQuotationItems(newItems);
-    const newTotal = totalAmount + item.price * item.quantity;
-    setTotalAmount(newTotal);
-    setNetAmount(newTotal - (newTotal * discount) / 100);
+    updateTotalAmount(newItems); // Update total amount after adding item
   };
 
   const handleDeleteQuotation = () => {
@@ -152,6 +150,7 @@ const Assemble = () => {
     };
     handleAddItem(customItem);
 
+    // Reset form data after submission
     setFormData({
       itemName: '',
       itemNumber: '',

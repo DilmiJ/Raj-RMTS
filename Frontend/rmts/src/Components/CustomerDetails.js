@@ -21,10 +21,16 @@ const CustomerDetails = ({ invoiceNumber }) => {
 
   // Fetch customer details on component mount
   useEffect(() => {
-    fetch('http://localhost:5000/api/customer-details')
-      .then(response => response.json())
-      .then(data => setCustomers(data))
-      .catch(err => console.error('Error fetching customers:', err));
+    const fetchCustomers = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/customer-details');
+        const data = await response.json();
+        setCustomers(data);
+      } catch (err) {
+        console.error('Error fetching customers:', err);
+      }
+    };
+    fetchCustomers();
   }, []);
 
   const handleInputChange = (e) => {
@@ -58,27 +64,60 @@ const CustomerDetails = ({ invoiceNumber }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (validateForm()) {
-      console.log('Form submitted:', { ...formData, invoiceNumber });
-      // Add form submission logic here, e.g., POST request to save the data
+      try {
+        const response = await fetch('http://localhost:5000/api/customer-details', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ...formData, invoiceNumber }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save customer data.');
+        }
+
+        const savedCustomer = await response.json();
+        setCustomers([...customers, savedCustomer]);
+        console.log('Form submitted:', savedCustomer);
+
+        // Clear the form after submission
+        setFormData({
+          customerName: '',
+          address: '',
+          mobileNumber: '',
+          whatsappNumber: '',
+          job: '',
+          email: '',
+          companyName: '',
+          companyAddress: '',
+          companyHotline: '',
+          companyWhatsapp: ''
+        });
+      } catch (error) {
+        console.error('Error submitting form:', error);
+      }
     }
   };
 
-  const deleteCustomer = (customerId) => {
-    fetch(`http://localhost:5000/api/customer-details/${customerId}`, {
-      method: 'DELETE',
-    })
-      .then(response => {
-        if (response.ok) {
-          setCustomers(customers.filter(customer => customer.CustomerID !== customerId));
-        } else {
-          alert('Failed to delete customer.');
-        }
-      })
-      .catch(err => console.error('Error deleting customer:', err));
+  const deleteCustomer = async (customerId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/customer-details/${customerId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setCustomers(customers.filter(customer => customer.CustomerID !== customerId));
+      } else {
+        alert('Failed to delete customer.');
+      }
+    } catch (err) {
+      console.error('Error deleting customer:', err);
+    }
   };
 
   return (
@@ -90,8 +129,8 @@ const CustomerDetails = ({ invoiceNumber }) => {
         <label>Invoice Number</label>
         <input
           type="text"
-          value={invoiceNumber} // Display the invoice number
-          readOnly // Make it non-editable
+          value={invoiceNumber}
+          readOnly
           className="readonly-input"
         />
       </div>
