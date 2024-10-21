@@ -83,7 +83,6 @@ const CustomerDetails = ({ invoiceNumber }) => {
 
         const savedCustomer = await response.json();
         setCustomers([...customers, savedCustomer]);
-        console.log('Form submitted:', savedCustomer);
 
         // Clear the form after submission
         setFormData({
@@ -111,7 +110,7 @@ const CustomerDetails = ({ invoiceNumber }) => {
       });
 
       if (response.ok) {
-        setCustomers(customers.filter(customer => customer.CustomerID !== customerId));
+        setCustomers(customers.filter(customer => customer._id !== customerId));
       } else {
         alert('Failed to delete customer.');
       }
@@ -257,9 +256,9 @@ const CustomerDetails = ({ invoiceNumber }) => {
       <h2>Customer List</h2>
       <ul>
         {customers.map(customer => (
-          <li key={customer.CustomerID}>
-            {customer.CustomerName} - {customer.Email}
-            <button onClick={() => deleteCustomer(customer.CustomerID)}>Delete</button>
+          <li key={customer._id}>
+            {customer.customerName} - {customer.email}
+            <button onClick={() => deleteCustomer(customer._id)}>Delete</button>
           </li>
         ))}
       </ul>
