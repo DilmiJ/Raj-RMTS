@@ -1,6 +1,6 @@
-const Customer = require('../models/customerModel');
+const Customer = require('../models/customerModel');// fronten code -form fully -get
 
-// Get all customers
+// Get all customers customer ist get 
 exports.getCustomers = async (req, res) => {
   try {
     const customers = await Customer.find();
@@ -10,7 +10,7 @@ exports.getCustomers = async (req, res) => {
   }
 };
 
-// Add a new customer
+// Add a new customer form funtion 
 exports.createCustomer = async (req, res) => {
   const customerData = req.body;
   try {
