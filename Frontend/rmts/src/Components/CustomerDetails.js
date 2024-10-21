@@ -18,18 +18,19 @@ const CustomerDetails = ({ invoiceNumber }) => {
 
   const [errors, setErrors] = useState({});
   const [customers, setCustomers] = useState([]);
+  const [editingCustomerId, setEditingCustomerId] = useState(null);
 
-  // Fetch customer details on component mount
+  const fetchCustomers = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/customer-details');
+      const data = await response.json();
+      setCustomers(data);
+    } catch (err) {
+      console.error('Error fetching customers:', err);
+    }
+  };
+
   useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/customer-details');
-        const data = await response.json();
-        setCustomers(data);
-      } catch (err) {
-        console.error('Error fetching customers:', err);
-      }
-    };
     fetchCustomers();
   }, []);
 
@@ -69,22 +70,21 @@ const CustomerDetails = ({ invoiceNumber }) => {
 
     if (validateForm()) {
       try {
-        const response = await fetch('http://localhost:5000/api/customer-details', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ ...formData, invoiceNumber }),
-        });
+        const response = await fetch(
+          `http://localhost:5000/api/customer-details${editingCustomerId ? `/${editingCustomerId}` : ''}`,
+          {
+            method: editingCustomerId ? 'PUT' : 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ...formData, invoiceNumber }),
+          }
+        );
 
         if (!response.ok) {
           throw new Error('Failed to save customer data.');
         }
 
-        const savedCustomer = await response.json();
-        setCustomers([...customers, savedCustomer]);
-
-        // Clear the form after submission
         setFormData({
           customerName: '',
           address: '',
@@ -97,6 +97,12 @@ const CustomerDetails = ({ invoiceNumber }) => {
           companyHotline: '',
           companyWhatsapp: ''
         });
+
+        fetchCustomers();
+
+        if (editingCustomerId) {
+          setEditingCustomerId(null);
+        }
       } catch (error) {
         console.error('Error submitting form:', error);
       }
@@ -110,7 +116,7 @@ const CustomerDetails = ({ invoiceNumber }) => {
       });
 
       if (response.ok) {
-        setCustomers(customers.filter(customer => customer._id !== customerId));
+        fetchCustomers();
       } else {
         alert('Failed to delete customer.');
       }
@@ -119,149 +125,185 @@ const CustomerDetails = ({ invoiceNumber }) => {
     }
   };
 
+  const updateCustomerData = (customer) => {
+    setFormData({
+      customerName: customer.customerName,
+      address: customer.address,
+      mobileNumber: customer.mobileNumber,
+      whatsappNumber: customer.whatsappNumber,
+      job: customer.job,
+      email: customer.email,
+      companyName: customer.companyName,
+      companyAddress: customer.companyAddress,
+      companyHotline: customer.companyHotline,
+      companyWhatsapp: customer.companyWhatsapp,
+    });
+    setEditingCustomerId(customer._id);
+  };
+
+  const viewCustomer = (customer) => {
+    alert(`Viewing customer: ${customer.customerName}`);
+    // Additional functionality to display the customer details can be added here.
+  };
+
   return (
     <div className="customer-details-container">
-      <h2>Customer Details</h2>
+      <div className="left-side">
+        <h2>Customer Details</h2>
 
-      {/* Display Invoice Number */}
-      <div className="form-group">
-        <label>Invoice Number</label>
-        <input
-          type="text"
-          value={invoiceNumber}
-          readOnly
-          className="readonly-input"
-        />
+        <div className="form-group">
+          <label>📄 Invoice Number</label>
+          <input
+            type="text"
+            value={invoiceNumber}
+            readOnly
+            className="readonly-input"
+          />
+        </div>
+
+        <form onSubmit={handleSubmit} className="customer-form">
+          {/* Customer Name */}
+          <div className="form-group">
+            <label>👤 Customer Name*</label>
+            <input
+              type="text"
+              name="customerName"
+              value={formData.customerName}
+              onChange={handleInputChange}
+              className={errors.customerName ? 'error-input' : ''}
+            />
+            {errors.customerName && <span className="error">{errors.customerName}</span>}
+          </div>
+
+          {/* Address */}
+          <div className="form-group">
+            <label>🏠 Customer Address*</label>
+            <input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          {/* Mobile Number */}
+          <div className="form-group">
+            <label>📞 Customer Mobile*</label>
+            <input
+              type="text"
+              name="mobileNumber"
+              value={formData.mobileNumber}
+              onChange={handleInputChange}
+              className={errors.mobileNumber ? 'error-input' : ''}
+            />
+            {errors.mobileNumber && <span className="error">{errors.mobileNumber}</span>}
+          </div>
+
+          {/* WhatsApp */}
+          <div className="form-group">
+            <label>💬 Customer WhatsApp</label>
+            <input
+              type="text"
+              name="whatsappNumber"
+              value={formData.whatsappNumber}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          {/* Job */}
+          <div className="form-group">
+            <label>💼 Customer Job</label>
+            <input
+              type="text"
+              name="job"
+              value={formData.job}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          {/* Email */}
+          <div className="form-group">
+            <label>📧 Customer Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <h3>Customer Company Details</h3>
+
+          {/* Company Name */}
+          <div className="form-group">
+            <label>🏢 Company Name*</label>
+            <input
+              type="text"
+              name="companyName"
+              value={formData.companyName}
+              onChange={handleInputChange}
+              className={errors.companyName ? 'error-input' : ''}
+            />
+            {errors.companyName && <span className="error">{errors.companyName}</span>}
+          </div>
+
+          {/* Company Address */}
+          <div className="form-group">
+            <label>🏠 Company Address*</label>
+            <input
+              type="text"
+              name="companyAddress"
+              value={formData.companyAddress}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          {/* Company Hotline */}
+          <div className="form-group">
+            <label>☎️ Company Hotline*</label>
+            <input
+              type="text"
+              name="companyHotline"
+              value={formData.companyHotline}
+              onChange={handleInputChange}
+              className={errors.companyHotline ? 'error-input' : ''}
+            />
+            {errors.companyHotline && <span className="error">{errors.companyHotline}</span>}
+          </div>
+
+          {/* Company WhatsApp */}
+          <div className="form-group">
+            <label>💬 Company WhatsApp</label>
+            <input
+              type="text"
+              name="companyWhatsapp"
+              value={formData.companyWhatsapp}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <button type="submit" className="submit-button">
+            <FaKeyboard className="submit-icon" /> {editingCustomerId ? 'Update' : 'Submit'}
+          </button>
+        </form>
       </div>
 
-      <form onSubmit={handleSubmit} className="customer-form">
-        {/* Customer Name */}
-        <div className="form-group">
-          <label>Customer Name*</label>
-          <input
-            type="text"
-            name="customerName"
-            value={formData.customerName}
-            onChange={handleInputChange}
-            className={errors.customerName ? 'error-input' : ''}
-          />
-          {errors.customerName && <span className="error">{errors.customerName}</span>}
-        </div>
-
-        {/* Other form fields */}
-        <div className="form-group">
-          <label>Customer Address*</label>
-          <input
-            type="text"
-            name="address"
-            value={formData.address}
-            onChange={handleInputChange}
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Customer Mobile*</label>
-          <input
-            type="text"
-            name="mobileNumber"
-            value={formData.mobileNumber}
-            onChange={handleInputChange}
-            className={errors.mobileNumber ? 'error-input' : ''}
-          />
-          {errors.mobileNumber && <span className="error">{errors.mobileNumber}</span>}
-        </div>
-
-        <div className="form-group">
-          <label>Customer WhatsApp</label>
-          <input
-            type="text"
-            name="whatsappNumber"
-            value={formData.whatsappNumber}
-            onChange={handleInputChange}
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Customer Job</label>
-          <input
-            type="text"
-            name="job"
-            value={formData.job}
-            onChange={handleInputChange}
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Customer Email</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-          />
-        </div>
-
-        <h3>Customer Company Details</h3>
-
-        <div className="form-group">
-          <label>Customer Company Name*</label>
-          <input
-            type="text"
-            name="companyName"
-            value={formData.companyName}
-            onChange={handleInputChange}
-            className={errors.companyName ? 'error-input' : ''}
-          />
-          {errors.companyName && <span className="error">{errors.companyName}</span>}
-        </div>
-
-        <div className="form-group">
-          <label>Customer Company Address*</label>
-          <input
-            type="text"
-            name="companyAddress"
-            value={formData.companyAddress}
-            onChange={handleInputChange}
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Customer Company Hotline*</label>
-          <input
-            type="text"
-            name="companyHotline"
-            value={formData.companyHotline}
-            onChange={handleInputChange}
-            className={errors.companyHotline ? 'error-input' : ''}
-          />
-          {errors.companyHotline && <span className="error">{errors.companyHotline}</span>}
-        </div>
-
-        <div className="form-group">
-          <label>Customer Company WhatsApp</label>
-          <input
-            type="text"
-            name="companyWhatsapp"
-            value={formData.companyWhatsapp}
-            onChange={handleInputChange}
-          />
-        </div>
-
-        <button type="submit" className="submit-button">
-          <FaKeyboard className="submit-icon" /> Submit
-        </button>
-      </form>
-
-      {/* Customer List */}
-      <h2>Customer List</h2>
-      <ul>
-        {customers.map(customer => (
-          <li key={customer._id}>
-            {customer.customerName} - {customer.email}
-            <button onClick={() => deleteCustomer(customer._id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
+      {/* Customer List on the right side */}
+      <div className="right-side">
+        <h2>Customers</h2>
+        <ul className="customer-list">
+          {customers.map((customer) => (
+            <li key={customer._id} className="customer-item">
+              <span>{customer.customerName}</span>
+              <div className="customer-actions">
+                <button onClick={() => updateCustomerData(customer)} className="update-button">Update</button>
+                <button onClick={() => viewCustomer(customer)} className="view-button">View</button>
+                <button onClick={() => deleteCustomer(customer._id)} className="delete-button">Delete</button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };

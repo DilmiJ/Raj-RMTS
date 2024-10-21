@@ -1,6 +1,6 @@
-const Customer = require('../models/customerModel');// fronten code -form fully -get
+const Customer = require('../models/customerModel');
 
-// Get all customers customer ist get 
+// Get all customers
 exports.getCustomers = async (req, res) => {
   try {
     const customers = await Customer.find();
@@ -10,7 +10,7 @@ exports.getCustomers = async (req, res) => {
   }
 };
 
-// Add a new customer form funtion 
+// Add a new customer
 exports.createCustomer = async (req, res) => {
   const customerData = req.body;
   try {
@@ -22,11 +22,29 @@ exports.createCustomer = async (req, res) => {
   }
 };
 
+exports.updateCustomer = async (req, res) => {
+  const { id } = req.params;
+  const updatedData = req.body;
+
+  try {
+    const updatedCustomer = await Customer.findByIdAndUpdate(id, updatedData, { new: true, runValidators: true });
+    if (!updatedCustomer) {
+      return res.status(404).json({ message: 'Customer not found' });
+    }
+    res.status(200).json(updatedCustomer);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update customer data' });
+  }
+};
+
 // Delete a customer
 exports.deleteCustomer = async (req, res) => {
   try {
     const { id } = req.params;
-    await Customer.findByIdAndDelete(id);
+    const deletedCustomer = await Customer.findByIdAndDelete(id);
+    if (!deletedCustomer) {
+      return res.status(404).json({ message: 'Customer not found' });
+    }
     res.status(200).json({ message: 'Customer deleted' });
   } catch (error) {
     res.status(500).json({ message: 'Failed to delete customer' });
