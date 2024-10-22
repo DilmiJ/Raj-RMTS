@@ -9,9 +9,9 @@ const Assemble = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [netAmount, setNetAmount] = useState(0);
-  const [activeButton, setActiveButton] = useState(null);
   const [isPasswordCorrect, setIsPasswordCorrect] = useState(false);
   const [showCustomForm, setShowCustomForm] = useState(false);
+  const [formStep, setFormStep] = useState(1); // Track form steps
   const [formData, setFormData] = useState({
     itemName: '',
     itemNumber: '',
@@ -51,38 +51,6 @@ const Assemble = () => {
       alert('Invalid password! Please try again.');
       setIsPasswordCorrect(false);
     }
-  };
-
-  const handleButtonClick = (buttonNumber) => {
-    setActiveButton(activeButton === buttonNumber ? null : buttonNumber);
-  };
-
-  const subButtons = {
-    1: [
-      { name: 'Item 1.1', price: 50, quantity: 1 },
-      { name: 'Item 1.2', price: 75, quantity: 1 },
-      { name: 'Item 1.3', price: 100, quantity: 1 },
-    ],
-    2: [
-      { name: 'Item 2.1', price: 60, quantity: 1 },
-      { name: 'Item 2.2', price: 80, quantity: 1 },
-      { name: 'Item 2.3', price: 110, quantity: 1 },
-    ],
-    3: [
-      { name: 'Item 3.1', price: 70, quantity: 1 },
-      { name: 'Item 3.2', price: 90, quantity: 1 },
-      { name: 'Item 3.3', price: 120, quantity: 1 },
-    ],
-    4: [
-      { name: 'Item 4.1', price: 65, quantity: 1 },
-      { name: 'Item 4.2', price: 85, quantity: 1 },
-      { name: 'Item 4.3', price: 130, quantity: 1 },
-    ],
-    5: [
-      { name: 'Item 5.1', price: 55, quantity: 1 },
-      { name: 'Item 5.2', price: 95, quantity: 1 },
-      { name: 'Item 5.3', price: 125, quantity: 1 },
-    ],
   };
 
   const handleIncrementQuantity = (index) => {
@@ -131,18 +99,43 @@ const Assemble = () => {
     }
   };
 
+  const handleNextStep = () => {
+    if (validateCurrentStep()) {
+      setFormStep(formStep + 1); // Move to the next form step
+    }
+  };
+
+  const validateCurrentStep = () => {
+    if (formStep === 1 && !formData.itemName) {
+      alert('Item Name is required!');
+      return false;
+    }
+    if (formStep === 2 && !formData.itemNumber) {
+      alert('Item Number is required!');
+      return false;
+    }
+    if (formStep === 3 && !formData.stockAvailable) {
+      alert('Stock Available is required!');
+      return false;
+    }
+    if (formStep === 4 && !formData.specification) {
+      alert('Specification is required!');
+      return false;
+    }
+    if (formStep === 5 && formData.images.length === 0) {
+      alert('At least one image is required!');
+      return false;
+    }
+    return true;
+  };
+
   const handleFormSubmit = (e) => {
     e.preventDefault();
 
-    // Validation for required fields
-    if (!formData.itemName || !formData.itemNumber || !formData.stockAvailable || !formData.specification || formData.images.length === 0) {
-      alert('Please fill in all fields and upload at least one image.');
-      return;
-    }
-
+    // Custom Item Creation
     const customItem = {
       name: formData.itemName,
-      price: 0, // Set default price for custom item
+      price: 0, // Default price
       quantity: formData.quantity,
       specifications: formData.specification,
       stockAvailable: formData.stockAvailable,
@@ -150,7 +143,7 @@ const Assemble = () => {
     };
     handleAddItem(customItem);
 
-    // Reset form data after submission
+    // Reset form and hide custom form
     setFormData({
       itemName: '',
       itemNumber: '',
@@ -160,6 +153,7 @@ const Assemble = () => {
       images: [],
     });
     setShowCustomForm(false);
+    setFormStep(1); // Reset form step
   };
 
   const generateQRCodeValue = () => {
@@ -188,27 +182,9 @@ const Assemble = () => {
       <div className="content">
         <div className="button-panel">
           <div className="button-group">
-            {Array.from({ length: 5 }, (_, index) => (
-              <div key={index + 1}>
-                <button onClick={() => handleButtonClick(index + 1)}>
-                  <i className="fas fa-plug"></i> No {index + 1}
-                </button>
-                {activeButton === index + 1 && (
-                  <div className="sub-button-group">
-                    {subButtons[index + 1] && subButtons[index + 1].map((item, subIndex) => (
-                      <button key={subIndex} onClick={() => handleAddItem(item)}>
-                        <i className="fas fa-cog"></i> {item.name} - ${item.price}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-            <div>
-              <button onClick={() => setShowCustomForm(true)}>
-                <i className="fas fa-plus"></i> +
-              </button>
-            </div>
+            <button onClick={() => setShowCustomForm(true)}>
+              <i className="fas fa-plus"></i> Add Custom Item
+            </button>
           </div>
         </div>
 
@@ -246,89 +222,93 @@ const Assemble = () => {
               ))}
             </tbody>
           </table>
+
           <div className="totals-section">
             <p>Total: ${totalAmount.toFixed(2)}</p>
             <p>Discount: {discount}%</p>
             <p>Net Amount: ${netAmount.toFixed(2)}</p>
           </div>
+
           <div className="quotation-actions">
-            <button className="apply-discount-button" onClick={handleApplyDiscount}>
-              Apply Discount
-            </button>
-            <button className="delete-quotation-button" onClick={handleDeleteQuotation}>
-              Delete Quotation
-            </button>
-            <button className="customer-details-button" onClick={navigateToCustomerDetails}>
-              Customer Details
-            </button>
+            <button onClick={handleApplyDiscount}>Apply Discount</button>
+            <button onClick={handleDeleteQuotation}>Delete Quotation</button>
+            <button onClick={navigateToCustomerDetails}>Customer Details</button>
           </div>
         </div>
 
         {showCustomForm && (
           <div className="custom-item-form">
-            <h4>Add Custom Item</h4>
+            <h4>Add Custom Item (Step {formStep} of 5)</h4>
             <form onSubmit={handleFormSubmit}>
-              <label>
-                Item Name:
-                <input
-                  type="text"
-                  name="itemName"
-                  value={formData.itemName}
-                  onChange={handleFormChange}
-                  required
-                />
-              </label>
-              <label>
-                Item Number:
-                <input
-                  type="text"
-                  name="itemNumber"
-                  value={formData.itemNumber}
-                  onChange={handleFormChange}
-                  required
-                />
-              </label>
-              <label>
-                Stock Available:
-                <input
-                  type="text"
-                  name="stockAvailable"
-                  value={formData.stockAvailable}
-                  onChange={handleFormChange}
-                  required
-                />
-              </label>
-              <label>
-                Specification:
-                <textarea
-                  name="specification"
-                  value={formData.specification}
-                  onChange={handleFormChange}
-                  required
-                />
-              </label>
-              <label>
-                Quantity:
-                <input
-                  type="number"
-                  name="quantity"
-                  value={formData.quantity}
-                  onChange={handleFormChange}
-                  min="1"
-                  required
-                />
-              </label>
-              <label>
-                Upload Images:
-                <input
-                  type="file"
-                  multiple
-                  accept=".png, .jpeg, .jpg"
-                  onChange={handleImageChange}
-                  required
-                />
-              </label>
-              <button type="submit">Add Item</button>
+              {formStep === 1 && (
+                <>
+                  <label>
+                    Item Name:
+                    <input
+                      type="text"
+                      name="itemName"
+                      value={formData.itemName}
+                      onChange={handleFormChange}
+                    />
+                  </label>
+                  <button type="button" onClick={handleNextStep}>Next</button>
+                </>
+              )}
+              {formStep === 2 && (
+                <>
+                  <label>
+                    Item Number:
+                    <input
+                      type="text"
+                      name="itemNumber"
+                      value={formData.itemNumber}
+                      onChange={handleFormChange}
+                    />
+                  </label>
+                  <button type="button" onClick={handleNextStep}>Next</button>
+                </>
+              )}
+              {formStep === 3 && (
+                <>
+                  <label>
+                    Stock Available:
+                    <input
+                      type="number"
+                      name="stockAvailable"
+                      value={formData.stockAvailable}
+                      onChange={handleFormChange}
+                    />
+                  </label>
+                  <button type="button" onClick={handleNextStep}>Next</button>
+                </>
+              )}
+              {formStep === 4 && (
+                <>
+                  <label>
+                    Specification:
+                    <textarea
+                      name="specification"
+                      value={formData.specification}
+                      onChange={handleFormChange}
+                    />
+                  </label>
+                  <button type="button" onClick={handleNextStep}>Next</button>
+                </>
+              )}
+              {formStep === 5 && (
+                <>
+                  <label>
+                    Upload Images:
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/png, image/jpeg"
+                      onChange={handleImageChange}
+                    />
+                  </label>
+                  <button type="submit">Submit Item</button>
+                </>
+              )}
             </form>
           </div>
         )}

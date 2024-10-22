@@ -10,6 +10,20 @@ exports.getCustomers = async (req, res) => {
   }
 };
 
+// Get a single customer by ID
+exports.getCustomerById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const customer = await Customer.findById(id);
+    if (!customer) {
+      return res.status(404).json({ message: 'Customer not found' });
+    }
+    res.status(200).json(customer);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to retrieve customer' });
+  }
+};
+
 // Add a new customer
 exports.createCustomer = async (req, res) => {
   const customerData = req.body;
@@ -22,6 +36,7 @@ exports.createCustomer = async (req, res) => {
   }
 };
 
+// Update a customer by ID
 exports.updateCustomer = async (req, res) => {
   const { id } = req.params;
   const updatedData = req.body;
@@ -37,10 +52,10 @@ exports.updateCustomer = async (req, res) => {
   }
 };
 
-// Delete a customer
+// Delete a customer by ID
 exports.deleteCustomer = async (req, res) => {
+  const { id } = req.params;
   try {
-    const { id } = req.params;
     const deletedCustomer = await Customer.findByIdAndDelete(id);
     if (!deletedCustomer) {
       return res.status(404).json({ message: 'Customer not found' });

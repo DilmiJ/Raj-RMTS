@@ -142,8 +142,19 @@ const CustomerDetails = ({ invoiceNumber }) => {
   };
 
   const viewCustomer = (customer) => {
-    alert(`Viewing customer: ${customer.customerName}`);
-    // Additional functionality to display the customer details can be added here.
+    setFormData({
+      customerName: customer.customerName,
+      address: customer.address,
+      mobileNumber: customer.mobileNumber,
+      whatsappNumber: customer.whatsappNumber,
+      job: customer.job,
+      email: customer.email,
+      companyName: customer.companyName,
+      companyAddress: customer.companyAddress,
+      companyHotline: customer.companyHotline,
+      companyWhatsapp: customer.companyWhatsapp,
+    });
+    // This function now populates the form fields with customer details
   };
 
   return (
@@ -297,8 +308,8 @@ const CustomerDetails = ({ invoiceNumber }) => {
               <span>{customer.customerName}</span>
               <div className="customer-actions">
                 <button onClick={() => updateCustomerData(customer)} className="update-button">Update</button>
-                <button onClick={() => viewCustomer(customer)} className="view-button">View</button>
                 <button onClick={() => deleteCustomer(customer._id)} className="delete-button">Delete</button>
+                <button onClick={() => viewCustomer(customer)} className="view-button">View</button>
               </div>
             </li>
           ))}
