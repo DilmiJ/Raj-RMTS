@@ -11,7 +11,6 @@ const Assemble = () => {
   const [netAmount, setNetAmount] = useState(0);
   const [isPasswordCorrect, setIsPasswordCorrect] = useState(false);
   const [showCustomForm, setShowCustomForm] = useState(false);
-  const [formStep, setFormStep] = useState(1); // Track form steps
   const [formData, setFormData] = useState({
     itemName: '',
     itemNumber: '',
@@ -99,43 +98,13 @@ const Assemble = () => {
     }
   };
 
-  const handleNextStep = () => {
-    if (validateCurrentStep()) {
-      setFormStep(formStep + 1); // Move to the next form step
-    }
-  };
-
-  const validateCurrentStep = () => {
-    if (formStep === 1 && !formData.itemName) {
-      alert('Item Name is required!');
-      return false;
-    }
-    if (formStep === 2 && !formData.itemNumber) {
-      alert('Item Number is required!');
-      return false;
-    }
-    if (formStep === 3 && !formData.stockAvailable) {
-      alert('Stock Available is required!');
-      return false;
-    }
-    if (formStep === 4 && !formData.specification) {
-      alert('Specification is required!');
-      return false;
-    }
-    if (formStep === 5 && formData.images.length === 0) {
-      alert('At least one image is required!');
-      return false;
-    }
-    return true;
-  };
-
   const handleFormSubmit = (e) => {
     e.preventDefault();
 
     // Custom Item Creation
     const customItem = {
       name: formData.itemName,
-      price: 0, // Default price
+      price: 0, // Default price (you can modify this later based on your logic)
       quantity: formData.quantity,
       specifications: formData.specification,
       stockAvailable: formData.stockAvailable,
@@ -153,7 +122,6 @@ const Assemble = () => {
       images: [],
     });
     setShowCustomForm(false);
-    setFormStep(1); // Reset form step
   };
 
   const generateQRCodeValue = () => {
@@ -237,79 +205,74 @@ const Assemble = () => {
         </div>
 
         {showCustomForm && (
-          <div className="custom-item-form">
-            <h4>Add Custom Item (Step {formStep} of 5)</h4>
-            <form onSubmit={handleFormSubmit}>
-              {formStep === 1 && (
-                <>
-                  <label>
-                    Item Name:
-                    <input
-                      type="text"
-                      name="itemName"
-                      value={formData.itemName}
-                      onChange={handleFormChange}
-                    />
-                  </label>
-                  <button type="button" onClick={handleNextStep}>Next</button>
-                </>
-              )}
-              {formStep === 2 && (
-                <>
-                  <label>
-                    Item Number:
-                    <input
-                      type="text"
-                      name="itemNumber"
-                      value={formData.itemNumber}
-                      onChange={handleFormChange}
-                    />
-                  </label>
-                  <button type="button" onClick={handleNextStep}>Next</button>
-                </>
-              )}
-              {formStep === 3 && (
-                <>
-                  <label>
-                    Stock Available:
-                    <input
-                      type="number"
-                      name="stockAvailable"
-                      value={formData.stockAvailable}
-                      onChange={handleFormChange}
-                    />
-                  </label>
-                  <button type="button" onClick={handleNextStep}>Next</button>
-                </>
-              )}
-              {formStep === 4 && (
-                <>
-                  <label>
-                    Specification:
-                    <textarea
-                      name="specification"
-                      value={formData.specification}
-                      onChange={handleFormChange}
-                    />
-                  </label>
-                  <button type="button" onClick={handleNextStep}>Next</button>
-                </>
-              )}
-              {formStep === 5 && (
-                <>
-                  <label>
-                    Upload Images:
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/png, image/jpeg"
-                      onChange={handleImageChange}
-                    />
-                  </label>
-                  <button type="submit">Submit Item</button>
-                </>
-              )}
-            </form>
+          <div className="custom-item-modal">
+            <div className="custom-item-form">
+              <h4>Add Custom Item</h4>
+              <form onSubmit={handleFormSubmit}>
+                <label>
+                  Item Name:
+                  <input
+                    type="text"
+                    name="itemName"
+                    value={formData.itemName}
+                    onChange={handleFormChange}
+                    required
+                  />
+                </label>
+                <label>
+                  Item Number:
+                  <input
+                    type="text"
+                    name="itemNumber"
+                    value={formData.itemNumber}
+                    onChange={handleFormChange}
+                    required
+                  />
+                </label>
+                <label>
+                  Stock Available:
+                  <input
+                    type="number"
+                    name="stockAvailable"
+                    value={formData.stockAvailable}
+                    onChange={handleFormChange}
+                    required
+                  />
+                </label>
+                <label>
+                  Specification:
+                  <textarea
+                    name="specification"
+                    value={formData.specification}
+                    onChange={handleFormChange}
+                    required
+                  />
+                </label>
+                <label>
+                  Quantity:
+                  <input
+                    type="number"
+                    name="quantity"
+                    value={formData.quantity}
+                    onChange={handleFormChange}
+                    min="1"
+                    required
+                  />
+                </label>
+                <label>
+                  Images:
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg"
+                    onChange={handleImageChange}
+                    multiple
+                    required
+                  />
+                </label>
+                <button type="submit">Add Item</button>
+                <button type="button" onClick={() => setShowCustomForm(false)}>Cancel</button>
+              </form>
+            </div>
           </div>
         )}
       </div>

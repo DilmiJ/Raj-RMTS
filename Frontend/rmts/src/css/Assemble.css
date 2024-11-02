@@ -134,13 +134,18 @@ button:hover {
   background-color: #585029; /* Slightly darker shade */
 }
 
-input[type="number"], input[type="text"] {
+input[type="number"], input[type="text"], textarea {
   padding: 8px;
   margin-right: 10px;
   border: none;
   border-radius: 3px;
   background-color: #333;
   color: #fff;
+  width: calc(100% - 20px); /* Adjust width to account for padding */
+}
+
+textarea {
+  resize: none; /* Prevent resizing for consistency */
 }
 
 h3 {
@@ -161,6 +166,34 @@ h3 {
   font-weight: bold;
 }
 
+/* Custom Item Form Styles */
+.custom-item-form {
+  background-color: #2a2a2a;
+  padding: 15px;
+  border-radius: 5px;
+  border: 1px solid #444;
+  margin-top: 20px;
+}
+
+.custom-item-form h4 {
+  color: #ff8c00; /* Light orange for form header */
+}
+
+.custom-item-form label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.custom-item-form button {
+  width: 100%; /* Full width for buttons in the form */
+  margin-top: 10px;
+}
+
+.custom-item-form input[type="file"] {
+  margin-top: 10px;
+}
+
+/* Media Queries for Responsiveness */
 @media (max-width: 768px) {
   .content {
     flex-direction: column;
