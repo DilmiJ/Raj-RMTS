@@ -32,7 +32,11 @@ exports.createAssemble = async (req, res) => {
         await newAssemble.save();
         res.status(201).json(newAssemble);
     } catch (error) {
-        res.status(500).json({ message: 'Failed to save item data' });
+        if (error.name === 'MongoError' && error.code === 11000) {
+            return res.status(400).json({ message: 'Item number must be unique' });
+        }
+        console.error('Failed to save item data:', error);
+        res.status(500).json({ message: 'Failed to save item data', error: error.message });
     }
 };
 
@@ -48,6 +52,7 @@ exports.updateAssemble = async (req, res) => {
         }
         res.status(200).json(updatedAssemble);
     } catch (error) {
+        console.error('Failed to update item data:', error);
         res.status(500).json({ message: 'Failed to update item data' });
     }
 };
@@ -62,6 +67,7 @@ exports.deleteAssemble = async (req, res) => {
         }
         res.status(200).json({ message: 'Item deleted' });
     } catch (error) {
+        console.error('Failed to delete item:', error);
         res.status(500).json({ message: 'Failed to delete item' });
     }
 };
