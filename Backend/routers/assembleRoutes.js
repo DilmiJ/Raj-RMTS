@@ -6,7 +6,7 @@ const {
     getAssembles,
     updateAssemble,
     deleteAssemble
-} = require('../controllers/assembleController');
+} = require('../controllers/assembleController'); // Import the controller functions
 
 const router = express.Router();
 

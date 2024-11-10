@@ -15,7 +15,7 @@ const Assemble = () => {
         images: [],
     });
     const [showForm, setShowForm] = useState(false);
-    const [showDetails, setShowDetails] = useState(null); // To show item details
+    const [showDetails, setShowDetails] = useState(null);
     const [quotation, setQuotation] = useState([]);
     const [quotationNumber] = useState(`RMTS-${Math.floor(Math.random() * 100000)}`);
     const navigate = useNavigate();
@@ -24,7 +24,11 @@ const Assemble = () => {
         const fetchItems = async () => {
             try {
                 const response = await axios.get('http://localhost:5000/api/assemble');
-                setItems(response.data);
+                if (Array.isArray(response.data)) {
+                    setItems(response.data);
+                } else {
+                    console.error('Received data is not an array:', response.data);
+                }
             } catch (error) {
                 console.error('Error fetching items from database:', error);
             }
@@ -254,10 +258,10 @@ const Assemble = () => {
             </div>
             <div className="right-side">
                 <h2>Quotation</h2>
-                <p>Quotation No: <span style={{color: 'grey'}}>{quotationNumber}</span></p>
+                <p>Quotation No: <span style={{ color: 'grey' }}>{quotationNumber}</span></p>
                 <QRCodeCanvas value={quotationNumber} size={128} />
                 {quotation.length === 0 ? (
-                    <p style={{color: 'grey'}}>No items added to quotation.</p>
+                    <p style={{ color: 'grey' }}>No items added to quotation.</p>
                 ) : (
                     <div>
                         {quotation.map((item, index) => (
@@ -265,12 +269,11 @@ const Assemble = () => {
                                 <p>{item.itemName} - {item.quantity} x {item.price} = {item.total}</p>
                             </div>
                         ))}
-                        <p><strong>Total: {quotation.reduce((total, item) => total + item.total, 0)}</strong></p>
+                        <button onClick={handleDeleteQuotation}>Delete All Items</button>
                     </div>
                 )}
-                <button onClick={handleDeleteQuotation}>Delete All</button>
-                <button onClick={handleCustomerDetails}>View Customer Details</button>
-                <button onClick={handleFinalView}>Final View</button> {/* Final View Button */}
+                <button onClick={handleCustomerDetails}>Proceed to Customer Details</button>
+                <button onClick={handleFinalView}>Proceed to Final View</button>
             </div>
         </div>
     );
