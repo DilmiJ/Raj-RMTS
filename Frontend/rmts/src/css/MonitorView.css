@@ -1,0 +1,44 @@
+.monitor-view {
+    background-color: #1c1c1e;
+    color: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  
+  .customer-details, .quotation-details {
+    background-color: #2c2c2e;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+  }
+  
+  .customer-details h2, .quotation-details h2 {
+    color: #ff9500; /* Orange accent color */
+  }
+  
+  .actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .reject-btn, .estimate-btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .reject-btn {
+    background-color: #ff3b30; /* Red for reject */
+    color: #fff;
+  }
+  
+  .estimate-btn {
+    background-color: #34c759; /* Green for estimate */
+    color: #fff;
+  }
+  
+  .reject-btn:hover, .estimate-btn:hover {
+    opacity: 0.8;
+  }
+  

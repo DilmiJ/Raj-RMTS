@@ -1,46 +1,31 @@
+// routes/assembleRoutes.js
 const express = require('express');
-const multer = require('multer');
-const Assemble = require('../models/assembleModel'); // Ensure this path is correct
+const multer = require('multer'); // Used to handle file uploads
+const {
+    createAssemble,
+    getAssembles,
+    updateAssemble,
+    deleteAssemble
+} = require('../controllers/assembleController');
 
 const router = express.Router();
-const upload = multer({ dest: 'uploads/' }); // Directory to save uploaded files
 
-// Route to add a new item (handles image uploads)
-router.post('/', upload.array('images', 10), async (req, res) => {
-    const { itemName, itemNumber, stockAvailable, price, specification } = req.body;
-
-    try {
-        const images = req.files.map(file => file.path); // Map uploaded file paths
-        const newItem = new Assemble({
-            itemName,
-            itemNumber,
-            stockAvailable,
-            price,
-            specification,
-            images,
-        });
-
-        await newItem.save();
-        res.status(201).json(newItem);
-    } catch (error) {
-        if (error.name === 'MongoError' && error.code === 11000) {
-            return res.status(400).json({ message: 'Item number must be unique' });
-        }
-        console.error('Failed to save item:', error);
-        res.status(500).json({ message: 'Failed to save item', error: error.message });
+// Set up multer storage for images
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/'); // Store uploaded files in the "uploads" folder
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${Date.now()}_${file.originalname}`);
     }
 });
 
-// Get all items
-router.get('/', async (req, res) => {
-    try {
-        const assembles = await Assemble.find();
-        res.status(200).json(assembles);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error' });
-    }
-});
+const upload = multer({ storage });
 
-// Other routes can be added here...
+// Define the routes
+router.post('/', upload.array('images'), createAssemble);  // Add new assemble item (with images)
+router.get('/', getAssembles);  // Get all assemble items
+router.put('/:id', upload.array('images'), updateAssemble);  // Update an assemble item
+router.delete('/:id', deleteAssemble);  // Delete an assemble item
 
 module.exports = router;

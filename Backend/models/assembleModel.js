@@ -1,7 +1,6 @@
-const mongoose = require('mongoose'); // Import mongoose
+const mongoose = require('mongoose');
 
-// Define the assemble schema
-const assembleSchema = new mongoose.Schema({
+const AssembleSchema = new mongoose.Schema({
     itemName: {
         type: String,
         required: true,
@@ -9,7 +8,7 @@ const assembleSchema = new mongoose.Schema({
     itemNumber: {
         type: String,
         required: true,
-        unique: true, // Ensures item numbers are unique
+        unique: true, // Ensure uniqueness
     },
     stockAvailable: {
         type: Number,
@@ -23,14 +22,7 @@ const assembleSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    images: {
-        type: [String], // Array of image URLs
-        required: true,
-    }
+    images: [String], // Array to store image paths/URLs
 });
 
-// Create the model
-const Assemble = mongoose.model('Assemble', assembleSchema);
-
-// Export the model
-module.exports = Assemble;
+module.exports = mongoose.model('Assemble', AssembleSchema);
