@@ -1,320 +1,284 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../css/Assemble.css';
-import { v4 as uuidv4 } from 'uuid';
 import { QRCodeCanvas } from 'qrcode.react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Assemble = () => {
-  const [quotationItems, setQuotationItems] = useState([]);
-  const [totalAmount, setTotalAmount] = useState(0);
-  const [discount, setDiscount] = useState(0);
-  const [netAmount, setNetAmount] = useState(0);
-  const [isPasswordCorrect, setIsPasswordCorrect] = useState(false);
-  const [showCustomForm, setShowCustomForm] = useState(false);
-  const [formStep, setFormStep] = useState(1); // Track form steps
-  const [formData, setFormData] = useState({
-    itemName: '',
-    itemNumber: '',
-    stockAvailable: '',
-    specification: '',
-    quantity: 1,
-    images: [],
-  });
-
-  const navigate = useNavigate(); // Use navigate to redirect to different routes
-  const invoiceNumberRef = useRef(uuidv4().slice(0, 8));
-
-  const handleAddItem = (item) => {
-    const newItems = [...quotationItems, item];
-    setQuotationItems(newItems);
-    updateTotalAmount(newItems); // Update total amount after adding item
-  };
-
-  const handleDeleteQuotation = () => {
-    setQuotationItems([]);
-    setTotalAmount(0);
-    setNetAmount(0);
-    setDiscount(0);
-    setIsPasswordCorrect(false);
-  };
-
-  const handleApplyDiscount = () => {
-    const enteredPassword = prompt('Enter the discount password:');
-    if (enteredPassword === '12345') {
-      setIsPasswordCorrect(true);
-      const discountValue = prompt('Enter the discount percentage:');
-      const discountPercentage = parseFloat(discountValue) || 0;
-      setDiscount(discountPercentage);
-      const newNetAmount = totalAmount - (totalAmount * discountPercentage) / 100;
-      setNetAmount(newNetAmount);
-    } else {
-      alert('Invalid password! Please try again.');
-      setIsPasswordCorrect(false);
-    }
-  };
-
-  const handleIncrementQuantity = (index) => {
-    const newItems = [...quotationItems];
-    newItems[index].quantity += 1;
-    setQuotationItems(newItems);
-    updateTotalAmount(newItems);
-  };
-
-  const handleDecrementQuantity = (index) => {
-    const newItems = [...quotationItems];
-    if (newItems[index].quantity > 1) {
-      newItems[index].quantity -= 1;
-      setQuotationItems(newItems);
-      updateTotalAmount(newItems);
-    }
-  };
-
-  const handleDeleteItem = (index) => {
-    const newItems = quotationItems.filter((_, i) => i !== index);
-    setQuotationItems(newItems);
-    updateTotalAmount(newItems);
-  };
-
-  const updateTotalAmount = (items) => {
-    const newTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    setTotalAmount(newTotal);
-    setNetAmount(newTotal - (newTotal * discount) / 100);
-  };
-
-  const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    const validImages = files.filter(file =>
-      file.type === 'image/png' || file.type === 'image/jpeg'
-    );
-
-    if (validImages.length > 0) {
-      setFormData((prev) => ({ ...prev, images: validImages }));
-    } else {
-      alert('Please upload at least one PNG or JPEG image.');
-    }
-  };
-
-  const handleNextStep = () => {
-    if (validateCurrentStep()) {
-      setFormStep(formStep + 1); // Move to the next form step
-    }
-  };
-
-  const validateCurrentStep = () => {
-    if (formStep === 1 && !formData.itemName) {
-      alert('Item Name is required!');
-      return false;
-    }
-    if (formStep === 2 && !formData.itemNumber) {
-      alert('Item Number is required!');
-      return false;
-    }
-    if (formStep === 3 && !formData.stockAvailable) {
-      alert('Stock Available is required!');
-      return false;
-    }
-    if (formStep === 4 && !formData.specification) {
-      alert('Specification is required!');
-      return false;
-    }
-    if (formStep === 5 && formData.images.length === 0) {
-      alert('At least one image is required!');
-      return false;
-    }
-    return true;
-  };
-
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-
-    // Custom Item Creation
-    const customItem = {
-      name: formData.itemName,
-      price: 0, // Default price
-      quantity: formData.quantity,
-      specifications: formData.specification,
-      stockAvailable: formData.stockAvailable,
-      images: formData.images,
-    };
-    handleAddItem(customItem);
-
-    // Reset form and hide custom form
-    setFormData({
-      itemName: '',
-      itemNumber: '',
-      stockAvailable: '',
-      specification: '',
-      quantity: 1,
-      images: [],
+    const [items, setItems] = useState([]);
+    const [formData, setFormData] = useState({
+        itemName: '',
+        itemNumber: '',
+        stockAvailable: '',
+        price: '',
+        specification: '',
+        images: [],
     });
-    setShowCustomForm(false);
-    setFormStep(1); // Reset form step
-  };
+    const [showForm, setShowForm] = useState(false);
+    const [showDetails, setShowDetails] = useState(null);
+    const [quotation, setQuotation] = useState([]);
+    const [quotationNumber] = useState(`RMTS-${Math.floor(Math.random() * 100000)}`);
+    const navigate = useNavigate();
 
-  const generateQRCodeValue = () => {
-    const data = {
-      invoiceNumber: invoiceNumberRef.current,
-      items: quotationItems.map((item) => ({
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        total: item.price * item.quantity,
-      })),
-      totalAmount,
-      discount,
-      netAmount,
+    useEffect(() => {
+        const fetchItems = async () => {
+            try {
+                const response = await axios.get('http://localhost:5000/api/assemble');
+                if (Array.isArray(response.data)) {
+                    setItems(response.data);
+                } else {
+                    console.error('Received data is not an array:', response.data);
+                }
+            } catch (error) {
+                console.error('Error fetching items from database:', error);
+            }
+        };
+        fetchItems();
+    }, []);
+
+    const handleFormChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    return JSON.stringify(data);
-  };
+    const handleImageChange = (e) => {
+        const files = Array.from(e.target.files);
+        const validImages = files.filter(file =>
+            file.type === 'image/png' || file.type === 'image/jpeg'
+        );
 
-  const navigateToCustomerDetails = () => {
-    navigate('/customer-details'); // Redirect to CustomerDetails page
-  };
+        if (validImages.length > 0) {
+            setFormData((prev) => ({ ...prev, images: validImages }));
+        } else {
+            alert('Please upload at least one PNG or JPEG image.');
+        }
+    };
 
-  return (
-    <div className="assemble-container">
-      <div className="content">
-        <div className="button-panel">
-          <div className="button-group">
-            <button onClick={() => setShowCustomForm(true)}>
-              <i className="fas fa-plus"></i> Add Custom Item
-            </button>
-          </div>
+    const saveItemToDatabase = async (item) => {
+        try {
+            const formDataToSend = new FormData();
+            Object.keys(item).forEach(key => {
+                if (key !== 'images') {
+                    formDataToSend.append(key, item[key]);
+                } else {
+                    item.images.forEach(image => {
+                        formDataToSend.append('images', image);
+                    });
+                }
+            });
+
+            const response = await axios.post('http://localhost:5000/api/assemble', formDataToSend, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+
+            return response.data;
+        } catch (error) {
+            console.error('Error saving item to database:', error);
+            alert('Error saving item to database: ' + (error.response?.data.message || error.message));
+        }
+    };
+
+    const handleAddItem = async () => {
+        const { itemName, itemNumber, stockAvailable, price, specification } = formData;
+        if (!itemName || !itemNumber || !stockAvailable || !price || !specification) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        const newItem = { ...formData, quantity: 1, total: formData.price };
+        const savedItem = await saveItemToDatabase(newItem);
+        if (savedItem) {
+            setItems((prev) => [...prev, savedItem]);
+            resetForm();
+        }
+    };
+
+    const resetForm = () => {
+        setFormData({
+            itemName: '',
+            itemNumber: '',
+            stockAvailable: '',
+            price: '',
+            specification: '',
+            images: [],
+        });
+        setShowForm(false);
+    };
+
+    const handleDeleteItem = async (id) => {
+        try {
+            await axios.delete(`http://localhost:5000/api/assemble/${id}`);
+            setItems(items.filter((item) => item._id !== id));
+        } catch (error) {
+            console.error('Error deleting item:', error);
+            alert('Error deleting item: ' + (error.response?.data.message || error.message));
+        }
+    };
+
+    const handleEditItem = (item) => {
+        setFormData({
+            itemName: item.itemName,
+            itemNumber: item.itemNumber,
+            stockAvailable: item.stockAvailable,
+            price: item.price,
+            specification: item.specification,
+            images: item.images || [],
+        });
+        setShowForm(true);
+        setShowDetails(item);
+    };
+
+    const updateItemInDatabase = async (id, updatedItem) => {
+        try {
+            const formDataToSend = new FormData();
+            Object.keys(updatedItem).forEach(key => {
+                if (key !== 'images') {
+                    formDataToSend.append(key, updatedItem[key]);
+                } else {
+                    updatedItem.images.forEach(image => {
+                        formDataToSend.append('images', image);
+                    });
+                }
+            });
+
+            const response = await axios.put(`http://localhost:5000/api/assemble/${id}`, formDataToSend, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error updating item in database:', error);
+            alert('Error updating item: ' + (error.response?.data.message || error.message));
+        }
+    };
+
+    const handleUpdateItem = async () => {
+        const updatedItem = { ...formData, quantity: 1, total: formData.price };
+        const savedItem = await updateItemInDatabase(showDetails._id, updatedItem);
+        if (savedItem) {
+            setItems((prev) => prev.map(item => item._id === showDetails._id ? savedItem : item));
+            setShowDetails(null);
+            resetForm();
+        }
+    };
+
+    const handleAddToQuotation = (item) => {
+        const existingItem = quotation.find((q) => q.itemNumber === item.itemNumber);
+        if (existingItem) {
+            setQuotation((prev) =>
+                prev.map((q) =>
+                    q.itemNumber === item.itemNumber ? { ...q, quantity: q.quantity + 1, total: q.total + item.price } : q
+                )
+            );
+        } else {
+            setQuotation((prev) => [...prev, { ...item, quantity: 1, total: item.price }]);
+        }
+    };
+
+    const handleDeleteQuotation = () => {
+        setQuotation([]);
+    };
+
+    const handleCustomerDetails = () => {
+        navigate('/customer-details');
+    };
+
+    const handleFinalView = () => {
+        navigate('/final-view');
+    };
+
+    return (
+        <div className="assemble-container">
+            <div className="left-side">
+                <h2>Add Custom Item</h2>
+                <button onClick={() => setShowForm(!showForm)}>Add Item</button>
+                {showForm && (
+                    <form className="custom-item-form">
+                        <input
+                            type="text"
+                            name="itemName"
+                            value={formData.itemName}
+                            onChange={handleFormChange}
+                            placeholder="Item Name"
+                            required
+                        />
+                        <input
+                            type="text"
+                            name="itemNumber"
+                            value={formData.itemNumber}
+                            onChange={handleFormChange}
+                            placeholder="Item Number"
+                            required
+                        />
+                        <input
+                            type="text"
+                            name="stockAvailable"
+                            value={formData.stockAvailable}
+                            onChange={handleFormChange}
+                            placeholder="Stock Available"
+                            required
+                        />
+                        <input
+                            type="number"
+                            name="price"
+                            value={formData.price}
+                            onChange={handleFormChange}
+                            placeholder="Price per Unit"
+                            required
+                        />
+                        <input
+                            type="text"
+                            name="specification"
+                            value={formData.specification}
+                            onChange={handleFormChange}
+                            placeholder="Specification"
+                            required
+                        />
+                        <input
+                            type="file"
+                            accept="image/png, image/jpeg"
+                            multiple
+                            onChange={handleImageChange}
+                        />
+                        <button type="button" onClick={handleAddItem}>Add Item</button>
+                        <button type="button" onClick={resetForm}>Cancel</button>
+                    </form>
+                )}
+                <div className="added-items">
+                    {items.map((item) => (
+                        <div key={item._id} className="added-item">
+                            <img
+                                src={item.images[0] ? `uploads/${item.images[0]}` : '/placeholder.png'}
+                                alt={item.itemName}
+                                className="item-image"
+                            />
+                            <button onClick={() => handleAddToQuotation(item)}>
+                                {item.itemName}
+                            </button>
+                            <button onClick={() => handleEditItem(item)}>Update</button>
+                            <button onClick={() => handleDeleteItem(item._id)}>Delete</button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <div className="right-side">
+                <h2>Quotation</h2>
+                <p>Quotation No: <span style={{ color: 'grey' }}>{quotationNumber}</span></p>
+                <QRCodeCanvas value={quotationNumber} size={128} />
+                <div className="quotation-buttons">
+                    <button onClick={handleDeleteQuotation}>Delete Quotation</button>
+                    <button onClick={handleCustomerDetails}>Customer Details</button>
+                    <button onClick={handleFinalView}>Final View</button>
+                </div>
+                <div className="quotation-items">
+                    {quotation.map((item, index) => (
+                        <div key={index} className="quotation-item">
+                            {item.itemName} - Quantity: {item.quantity} - Total: ${item.total}
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
-
-        <div className="quotation-panel">
-          <h3>Quotation No: {invoiceNumberRef.current}</h3>
-          <QRCodeCanvas value={generateQRCodeValue()} size={128} />
-
-          <table className="quotation-table">
-            <thead>
-              <tr>
-                <th>Item Name</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Total</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {quotationItems.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.name}</td>
-                  <td>
-                    <button onClick={() => handleDecrementQuantity(index)}>-</button>
-                    {item.quantity}
-                    <button onClick={() => handleIncrementQuantity(index)}>+</button>
-                  </td>
-                  <td>${item.price.toFixed(2)}</td>
-                  <td>${(item.price * item.quantity).toFixed(2)}</td>
-                  <td>
-                    <button onClick={() => handleDeleteItem(index)}>
-                      <i className="fas fa-trash"></i>
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <div className="totals-section">
-            <p>Total: ${totalAmount.toFixed(2)}</p>
-            <p>Discount: {discount}%</p>
-            <p>Net Amount: ${netAmount.toFixed(2)}</p>
-          </div>
-
-          <div className="quotation-actions">
-            <button onClick={handleApplyDiscount}>Apply Discount</button>
-            <button onClick={handleDeleteQuotation}>Delete Quotation</button>
-            <button onClick={navigateToCustomerDetails}>Customer Details</button>
-          </div>
-        </div>
-
-        {showCustomForm && (
-          <div className="custom-item-form">
-            <h4>Add Custom Item (Step {formStep} of 5)</h4>
-            <form onSubmit={handleFormSubmit}>
-              {formStep === 1 && (
-                <>
-                  <label>
-                    Item Name:
-                    <input
-                      type="text"
-                      name="itemName"
-                      value={formData.itemName}
-                      onChange={handleFormChange}
-                    />
-                  </label>
-                  <button type="button" onClick={handleNextStep}>Next</button>
-                </>
-              )}
-              {formStep === 2 && (
-                <>
-                  <label>
-                    Item Number:
-                    <input
-                      type="text"
-                      name="itemNumber"
-                      value={formData.itemNumber}
-                      onChange={handleFormChange}
-                    />
-                  </label>
-                  <button type="button" onClick={handleNextStep}>Next</button>
-                </>
-              )}
-              {formStep === 3 && (
-                <>
-                  <label>
-                    Stock Available:
-                    <input
-                      type="number"
-                      name="stockAvailable"
-                      value={formData.stockAvailable}
-                      onChange={handleFormChange}
-                    />
-                  </label>
-                  <button type="button" onClick={handleNextStep}>Next</button>
-                </>
-              )}
-              {formStep === 4 && (
-                <>
-                  <label>
-                    Specification:
-                    <textarea
-                      name="specification"
-                      value={formData.specification}
-                      onChange={handleFormChange}
-                    />
-                  </label>
-                  <button type="button" onClick={handleNextStep}>Next</button>
-                </>
-              )}
-              {formStep === 5 && (
-                <>
-                  <label>
-                    Upload Images:
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/png, image/jpeg"
-                      onChange={handleImageChange}
-                    />
-                  </label>
-                  <button type="submit">Submit Item</button>
-                </>
-              )}
-            </form>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+    );
 };
 
 export default Assemble;

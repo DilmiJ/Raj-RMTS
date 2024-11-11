@@ -1,206 +1,64 @@
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #1a1a1a;
-  color: #ffffff;
-}
-
 .assemble-container {
-  padding: 20px;
-}
-
-.header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.qr-code {
-  margin-left: auto;
-  margin-bottom: 10px;
-  text-align: center;
-}
-
-.invoice-number {
-  text-align: center;
-  font-weight: bold;
-  font-size: 16px;
-  color: #ff8c00; /* Light orange for contrast */
-}
-
-.content {
-  display: flex;
-  flex-wrap: wrap; /* Wrap to handle smaller screens */
-  margin-top: 20px;
-}
-
-.button-panel {
-  flex: 1;
-  margin-right: 20px;
-  background-color: #2a2a2a;
-  padding: 15px;
-  border-radius: 5px;
-  border: 1px solid #444; /* Subtle border for better distinction */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Shadow for elevation */
-}
-
-.button-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.sub-button-group {
-  display: flex;
-  flex-direction: column;
-  margin-left: 10px;
-  margin-top: 10px;
-}
-
-.sub-button-group button {
-  margin-top: 5px;
-}
-
-.quotation-panel {
-  flex: 2;
-  background-color: #2a2a2a;
-  padding: 15px;
-  border-radius: 5px;
-  border: 1px solid #444;
-  position: relative;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Shadow for elevation */
-}
-
-.invoice-section {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  text-align: center;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 50px; /* Margin for QR code and invoice */
-}
-
-th, td {
-  padding: 10px;
-  border: 1px solid #444;
-  text-align: left;
-}
-
-th {
-  background-color: #333; /* Darker background for table headers */
-  color: #ff8c00; /* Light orange for header text */
-}
-
-td {
-  background-color: #222; /* Slightly lighter background for table cells */
-}
-
-.actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
-}
-
-.delete-button {
-  background-color: red;
+  height: 100vh;
+  background-color: #121212;
   color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 3px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
-.delete-button:hover {
-  background-color: darkred;
+.left-side, .right-side {
+  width: 50%;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.left-side {
+  border-right: 1px solid #333;
+}
+
+h2 {
+  margin-bottom: 10px;
 }
 
 button {
-  background-color: #d6770a; /* Updated for better contrast */
+  background-color: #ff5722;
   color: white;
   border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
   cursor: pointer;
-  margin-right: 10px;
-  margin-top: 10px;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s;
 }
 
 button:hover {
-  background-color: #585029; /* Slightly darker shade */
+  background-color: #e64a19;
 }
 
-input[type="number"], input[type="text"] {
-  padding: 8px;
+.custom-item-form {
+  display: flex;
+  flex-direction: column;
+}
+
+input, textarea {
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #444;
+  background-color: #222;
+  color: white;
+}
+
+.added-items {
+  margin-top: 20px;
+}
+
+.added-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.item-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
   margin-right: 10px;
-  border: none;
-  border-radius: 3px;
-  background-color: #333;
-  color: #fff;
-}
-
-h3 {
-  margin: 10px 0;
-  color: #ff8c00; /* Light orange for headers */
-}
-
-.invoice-section .qr-code {
-  background-color: #ffffff;
-  padding: 5px;
-  border-radius: 5px;
-}
-
-.invoice-number {
-  color: #ff8c00; /* Matching theme */
-  margin-top: 5px;
-  font-size: 16px;
-  font-weight: bold;
-}
-
-@media (max-width: 768px) {
-  .content {
-    flex-direction: column;
-  }
-
-  .button-panel {
-    margin-bottom: 20px;
-  }
-
-  .quotation-panel {
-    margin-top: 20px;
-  }
-
-  .invoice-section {
-    position: static;
-    margin-top: 20px;
-    text-align: center;
-  }
-}
-
-@media (max-width: 480px) {
-  button {
-    padding: 8px 12px;
-    font-size: 14px;
-  }
-
-  th, td {
-    padding: 8px;
-  }
-
-  .actions {
-    flex-direction: column;
-  }
-
-  .delete-button {
-    margin-top: 10px;
-    width: 100%;
-  }
-
-  .invoice-number {
-    font-size: 14px;
-  }
 }
