@@ -78,30 +78,6 @@ const Assemble = () => {
         }
     };
 
-    const updateItemInDatabase = async (id, updatedItem) => {
-        try {
-            const formDataToSend = new FormData();
-            Object.keys(updatedItem).forEach(key => {
-                if (key !== 'images') {
-                    formDataToSend.append(key, updatedItem[key]);
-                } else {
-                    updatedItem.images.forEach(image => {
-                        formDataToSend.append('images', image);
-                    });
-                }
-            });
-
-            const response = await axios.put(`http://localhost:5000/api/assemble/${id}`, formDataToSend, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-
-            return response.data;
-        } catch (error) {
-            console.error('Error updating item in database:', error);
-            alert('Error updating item: ' + (error.response?.data.message || error.message));
-        }
-    };
-
     const handleAddItem = async () => {
         const { itemName, itemNumber, stockAvailable, price, specification } = formData;
         if (!itemName || !itemNumber || !stockAvailable || !price || !specification) {
@@ -129,10 +105,6 @@ const Assemble = () => {
         setShowForm(false);
     };
 
-    const handleAddToQuotation = (item) => {
-        setQuotation((prev) => [...prev, item]);
-    };
-
     const handleDeleteItem = async (id) => {
         try {
             await axios.delete(`http://localhost:5000/api/assemble/${id}`);
@@ -140,21 +112,6 @@ const Assemble = () => {
         } catch (error) {
             console.error('Error deleting item:', error);
             alert('Error deleting item: ' + (error.response?.data.message || error.message));
-        }
-    };
-
-    const handleUpdateItem = async () => {
-        const updatedItem = { ...formData, quantity: 1, total: formData.price };
-        if (!updatedItem.itemName || !updatedItem.itemNumber || !updatedItem.stockAvailable || !updatedItem.price || !updatedItem.specification) {
-            alert('Please fill in all fields');
-            return;
-        }
-
-        const savedItem = await updateItemInDatabase(showDetails._id, updatedItem);
-        if (savedItem) {
-            setItems((prev) => prev.map(item => item._id === showDetails._id ? savedItem : item));
-            setShowDetails(null); // Close the details modal
-            resetForm(); // Reset the form
         }
     };
 
@@ -171,19 +128,62 @@ const Assemble = () => {
         setShowDetails(item);
     };
 
-    // Delete all items from quotation
+    const updateItemInDatabase = async (id, updatedItem) => {
+        try {
+            const formDataToSend = new FormData();
+            Object.keys(updatedItem).forEach(key => {
+                if (key !== 'images') {
+                    formDataToSend.append(key, updatedItem[key]);
+                } else {
+                    updatedItem.images.forEach(image => {
+                        formDataToSend.append('images', image);
+                    });
+                }
+            });
+
+            const response = await axios.put(`http://localhost:5000/api/assemble/${id}`, formDataToSend, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error updating item in database:', error);
+            alert('Error updating item: ' + (error.response?.data.message || error.message));
+        }
+    };
+
+    const handleUpdateItem = async () => {
+        const updatedItem = { ...formData, quantity: 1, total: formData.price };
+        const savedItem = await updateItemInDatabase(showDetails._id, updatedItem);
+        if (savedItem) {
+            setItems((prev) => prev.map(item => item._id === showDetails._id ? savedItem : item));
+            setShowDetails(null);
+            resetForm();
+        }
+    };
+
+    const handleAddToQuotation = (item) => {
+        const existingItem = quotation.find((q) => q.itemNumber === item.itemNumber);
+        if (existingItem) {
+            setQuotation((prev) =>
+                prev.map((q) =>
+                    q.itemNumber === item.itemNumber ? { ...q, quantity: q.quantity + 1, total: q.total + item.price } : q
+                )
+            );
+        } else {
+            setQuotation((prev) => [...prev, { ...item, quantity: 1, total: item.price }]);
+        }
+    };
+
     const handleDeleteQuotation = () => {
         setQuotation([]);
     };
 
-    // Navigate to the customer details page
     const handleCustomerDetails = () => {
         navigate('/customer-details');
     };
 
-    // Navigate to the Monitor View page
     const handleFinalView = () => {
-        navigate('/monitor-view');
+        navigate('/final-view');
     };
 
     return (
@@ -246,10 +246,14 @@ const Assemble = () => {
                 <div className="added-items">
                     {items.map((item) => (
                         <div key={item._id} className="added-item">
+                            <img
+                                src={item.images[0] ? `uploads/${item.images[0]}` : '/placeholder.png'}
+                                alt={item.itemName}
+                                className="item-image"
+                            />
                             <button onClick={() => handleAddToQuotation(item)}>
                                 {item.itemName}
                             </button>
-                            <button onClick={() => setShowDetails(item)}>View Details</button>
                             <button onClick={() => handleEditItem(item)}>Update</button>
                             <button onClick={() => handleDeleteItem(item._id)}>Delete</button>
                         </div>
@@ -260,20 +264,18 @@ const Assemble = () => {
                 <h2>Quotation</h2>
                 <p>Quotation No: <span style={{ color: 'grey' }}>{quotationNumber}</span></p>
                 <QRCodeCanvas value={quotationNumber} size={128} />
-                {quotation.length === 0 ? (
-                    <p style={{ color: 'grey' }}>No items added to quotation.</p>
-                ) : (
-                    <div>
-                        {quotation.map((item, index) => (
-                            <div key={index} className="quotation-item">
-                                <p>{item.itemName} - {item.quantity} x {item.price} = {item.total}</p>
-                            </div>
-                        ))}
-                        <button onClick={handleDeleteQuotation}>Delete All Items</button>
-                    </div>
-                )}
-                <button onClick={handleCustomerDetails}>Proceed to Customer Details</button>
-                <button onClick={handleFinalView}>Proceed to Final View</button>
+                <div className="quotation-buttons">
+                    <button onClick={handleDeleteQuotation}>Delete Quotation</button>
+                    <button onClick={handleCustomerDetails}>Customer Details</button>
+                    <button onClick={handleFinalView}>Final View</button>
+                </div>
+                <div className="quotation-items">
+                    {quotation.map((item, index) => (
+                        <div key={index} className="quotation-item">
+                            {item.itemName} - Quantity: {item.quantity} - Total: ${item.total}
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
