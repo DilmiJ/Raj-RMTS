@@ -1,46 +1,82 @@
-// controllers/assembleController.js
+
+const Assemble = require('../models/AssembleModels '); // Correct path to the model
+
+// Your controller methods here
+
 
 // Handle creating a new assemble item
-exports.createAssemble = (req, res) => {
+exports.createAssemble = async (req, res) => {
     try {
-        // Access uploaded files using req.files
-        const images = req.files;
-        // Here you can implement logic to save the assemble data to a database
-        res.status(201).send({ message: 'Assemble item created successfully', images });
+        const { itemName, itemNumber, stockAvailable, price, specification } = req.body;
+        const images = req.files ? req.files.map(file => file.path) : []; // Store file paths of uploaded images
+
+        const newAssemble = new Assemble({
+            itemName,
+            itemNumber,
+            stockAvailable,
+            price,
+            specification,
+            images
+        });
+
+        const savedAssemble = await newAssemble.save(); // Save the item to the database
+        res.status(201).send({ message: 'Assemble item created successfully', data: savedAssemble });
     } catch (error) {
+        console.error('Error creating assemble item:', error);
         res.status(500).send({ message: 'Failed to create assemble item', error });
     }
 };
 
 // Handle fetching all assemble items
-exports.getAssembles = (req, res) => {
+exports.getAssembles = async (req, res) => {
     try {
-        // Here you can implement logic to fetch assemble items from the database
-        res.status(200).send({ message: 'List of assembles' });
+        const assembles = await Assemble.find(); // Fetch all items from the database
+        res.status(200).send({ message: 'List of assembles', data: assembles });
     } catch (error) {
+        console.error('Error fetching assembles:', error);
         res.status(500).send({ message: 'Failed to get assembles', error });
     }
 };
 
 // Handle updating an assemble item by ID
-exports.updateAssemble = (req, res) => {
+exports.updateAssemble = async (req, res) => {
     try {
         const { id } = req.params;
-        const images = req.files; // Get updated images
-        // Here you can implement logic to update the assemble item in the database
-        res.status(200).send({ message: `Assemble item with ID ${id} updated successfully`, images });
+        const { itemName, itemNumber, stockAvailable, price, specification } = req.body;
+        const images = req.files ? req.files.map(file => file.path) : [];
+
+        const updatedData = {
+            itemName,
+            itemNumber,
+            stockAvailable,
+            price,
+            specification,
+            images
+        };
+
+        const updatedAssemble = await Assemble.findByIdAndUpdate(id, updatedData, { new: true }); // Update the item by ID
+        res.status(200).send({ message: `Assemble item with ID ${id} updated successfully`, data: updatedAssemble });
     } catch (error) {
+        console.error('Error updating assemble item:', error);
         res.status(500).send({ message: 'Failed to update assemble item', error });
     }
 };
 
 // Handle deleting an assemble item by ID
-exports.deleteAssemble = (req, res) => {
+exports.deleteAssemble = async (req, res) => {
     try {
         const { id } = req.params;
-        // Here you can implement logic to delete the assemble item from the database
+        await Assemble.findByIdAndDelete(id); // Delete the item by ID
         res.status(200).send({ message: `Assemble item with ID ${id} deleted successfully` });
     } catch (error) {
+        console.error('Error deleting assemble item:', error);
         res.status(500).send({ message: 'Failed to delete assemble item', error });
     }
 };
+
+
+
+
+
+
+
