@@ -1,19 +1,15 @@
 const express = require('express');
-const { 
-  getAssembles, 
-  createAssemble, 
-  updateAssemble, 
-  deleteAssemble, 
-  getAssembleById 
-} = require('../controllers/assembleController'); // Adjust the path if necessary
-
 const router = express.Router();
+const assembleController = require('../controllers/assembleController');
+const multer = require('multer');
 
-// Routes
-router.get('/', getAssembles); // Get all assemble items
-router.get('/:id', getAssembleById); // Get a single assemble item by ID
-router.post('/', createAssemble); // Add a new assemble item
-router.put('/:id', updateAssemble); // Update an assemble item by ID
-router.delete('/:id', deleteAssemble); // Delete an assemble item by ID
+const upload = multer({ dest: 'uploads/' }); // Define file upload destination
+
+// Define routes for assemble operations
+router.post('/', upload.array('images', 5), assembleController.createAssemble);
+router.get('/', assembleController.getAssembles);
+router.get('/:id', assembleController.getAssembleById);
+router.put('/:id', upload.array('images', 5), assembleController.updateAssemble);
+router.delete('/:id', assembleController.deleteAssemble);
 
 module.exports = router;
