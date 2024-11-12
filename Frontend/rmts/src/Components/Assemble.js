@@ -131,6 +131,7 @@ const Assemble = () => {
                         <button type="button" onClick={handleClose}>Cancel</button>
                     </form>
 <<<<<<< HEAD
+<<<<<<< HEAD
                 )}
                 <div className="added-items">
                     {items.map((item) => (
@@ -185,6 +186,29 @@ const Assemble = () => {
                 <button onClick={handleDeleteQuotation}>Clear Quotation</button>
                 <button onClick={handleCustomerDetails}>Add Customer Details</button>
                 <button onClick={handleFinalView}>View Final Quotation</button>
+=======
+                </div>
+            )}
+
+            {isViewMode && selectedItem && (
+                <div className="view-details">
+                    <h2>Item Details</h2>
+                    <p>Name: {selectedItem.name}</p>
+                    <p>Item Number: {selectedItem.itemNumber}</p>
+                    <p>Stock Available: {selectedItem.stockAvailable}</p>
+                    <p>Price: {selectedItem.pricePerUnit}</p>
+                    <p>Specification: {selectedItem.specification}</p>
+                    <button onClick={handleClose}>Close Details</button>
+                </div>
+            )}
+
+            {/* Quotation Section */}
+            <div className="quotation-section">
+                <h2>Quotation</h2>
+                <button>Generate Quotation</button>
+                <button>Save Quotation</button>
+                <button>Print Quotation</button>
+>>>>>>> db1221439145c328535cda26fd0b0047df4cfa1b
 =======
                 </div>
             )}
