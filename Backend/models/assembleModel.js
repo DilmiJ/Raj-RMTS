@@ -22,7 +22,10 @@ const AssembleSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    images: [String], // Array to store image paths/URLs
+    images: [{
+        data: Buffer,
+        contentType: String,
+    }], // Store images as buffers
 });
 
 module.exports = mongoose.model('Assemble', AssembleSchema);

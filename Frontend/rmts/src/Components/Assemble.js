@@ -1,156 +1,248 @@
 import React, { useState, useEffect } from 'react';
+import '../css/Assemble.css';
+import { QRCodeCanvas } from 'qrcode.react';
 import axios from 'axios';
 
 const Assemble = () => {
     const [items, setItems] = useState([]);
-    const [selectedItem, setSelectedItem] = useState(null);
-    const [isUpdateMode, setIsUpdateMode] = useState(false);
-    const [isViewMode, setIsViewMode] = useState(false);
+    const [formData, setFormData] = useState({
+        itemName: '',
+        itemNumber: '',
+        stockAvailable: '',
+        price: '',
+        specification: '',
+        images: [],
+    });
+    const [showForm, setShowForm] = useState(false);
+    const [showDetails, setShowDetails] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [selectedItemId, setSelectedItemId] = useState(null);
+    const [quotationNumber] = useState(`RMTS-${Math.floor(Math.random() * 100000)}`);
 
-    // Fetch items from the backend
     useEffect(() => {
         const fetchItems = async () => {
             try {
-                const response = await axios.get('/api/items');
+                const response = await axios.get('http://localhost:5000/api/assemble');
                 setItems(response.data);
             } catch (error) {
-                console.error('Error fetching items:', error);
+                console.error('Error fetching items from database:', error);
             }
         };
         fetchItems();
     }, []);
 
-    // Open the Update form with the selected item details
-    const handleEdit = (item) => {
-        setSelectedItem(item);
-        setIsUpdateMode(true);
+    const handleFormChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Open the View details with the selected item
-    const handleView = (item) => {
-        setSelectedItem(item);
-        setIsViewMode(true);
+    const handleImageChange = (e) => {
+        const files = Array.from(e.target.files);
+        setFormData((prev) => ({ ...prev, images: files }));
     };
 
-    // Close Update or View form
-    const handleClose = () => {
-        setIsUpdateMode(false);
-        setIsViewMode(false);
-        setSelectedItem(null);
-    };
-
-    // Update item handler
-    const handleUpdate = async (e) => {
-        e.preventDefault();
+    const saveItemToDatabase = async (item) => {
         try {
-            await axios.put(`/api/items/${selectedItem.id}`, selectedItem);
-            const updatedItems = items.map((item) =>
-                item.id === selectedItem.id ? selectedItem : item
-            );
-            setItems(updatedItems);
-            handleClose();
+            const formDataToSend = new FormData();
+            Object.keys(item).forEach(key => {
+                if (key !== 'images') {
+                    formDataToSend.append(key, item[key]);
+                } else {
+                    item.images.forEach(image => {
+                        formDataToSend.append('images', image);
+                    });
+                }
+            });
+
+            formDataToSend.forEach((value, key) => {
+                console.log(key, value);
+            });
+
+            const response = await axios.post('http://localhost:5000/api/assemble', formDataToSend, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+
+            return response.data;
         } catch (error) {
-            console.error('Error updating item:', error);
+            console.error('Error saving item to database:', error);
+            alert('Error saving item to database');
         }
     };
 
-    // Update selected item fields as they are edited
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setSelectedItem((prevItem) => ({
-            ...prevItem,
-            [name]: value,
-        }));
+    const handleAddItem = async () => {
+        const newItem = { ...formData, quantity: 1, total: formData.price };
+        const savedItem = await saveItemToDatabase(newItem);
+        if (savedItem) {
+            setItems((prev) => [...prev, savedItem]);
+            resetForm();
+        }
+    };
+
+    const handleUpdateItem = async () => {
+        const updatedItem = { ...formData, quantity: 1, total: formData.price };
+        try {
+            const formDataToSend = new FormData();
+            Object.keys(updatedItem).forEach(key => {
+                if (key !== 'images') {
+                    formDataToSend.append(key, updatedItem[key]);
+                } else {
+                    updatedItem.images.forEach(image => {
+                        formDataToSend.append('images', image);
+                    });
+                }
+            });
+
+            const response = await axios.put(`http://localhost:5000/api/assemble/${selectedItemId}`, formDataToSend, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            setItems((prev) => prev.map((item) => (item._id === selectedItemId ? response.data : item)));
+            resetForm();
+        } catch (error) {
+            console.error('Error updating item in database:', error);
+            alert('Error updating item');
+        }
+    };
+
+    const resetForm = () => {
+        setFormData({
+            itemName: '',
+            itemNumber: '',
+            stockAvailable: '',
+            price: '',
+            specification: '',
+            images: [],
+        });
+        setShowForm(false);
+        setIsEditing(false);
+        setSelectedItemId(null);
+    };
+
+    const handleEditItem = (item) => {
+        setFormData({
+            itemName: item.itemName,
+            itemNumber: item.itemNumber,
+            stockAvailable: item.stockAvailable,
+            price: item.price,
+            specification: item.specification,
+            images: item.images || [],
+        });
+        setShowForm(true);
+        setIsEditing(true);
+        setSelectedItemId(item._id);
+    };
+
+    const handleViewItem = (item) => {
+        setShowDetails(item);
+    };
+
+    const handleDeleteItem = async (id) => {
+        try {
+            await axios.delete(`http://localhost:5000/api/assemble/${id}`);
+            setItems((prev) => prev.filter((item) => item._id !== id));
+        } catch (error) {
+            console.error('Error deleting item:', error);
+            alert('Error deleting item');
+        }
     };
 
     return (
-        <div>
-            <h1>Assemble Items</h1>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Item Name</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {items.map((item) => (
-                        <tr key={item.id}>
-                            <td>{item.name}</td>
-                            <td>
-                                <button onClick={() => handleView(item)}>View</button>
-                                <button onClick={() => handleEdit(item)}>Edit</button>
-                                <button onClick={() => /* handleDelete logic here */}>Delete</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-
-            {isUpdateMode && selectedItem && (
-                <div className="update-form">
-                    <h2>Update Item</h2>
-                    <button onClick={handleClose}>Close Form</button>
-                    <form onSubmit={handleUpdate}>
+        <div className="assemble-container">
+            <div className="left-side">
+                <h2>{isEditing ? "Update Item" : "Add Custom Item"}</h2>
+                <button onClick={() => setShowForm(!showForm)}>
+                    {showForm ? "Close Form" : "Add Item"}
+                </button>
+                {showForm && (
+                    <form className="custom-item-form">
                         <input
                             type="text"
-                            name="name"
-                            value={selectedItem.name}
-                            onChange={handleInputChange}
+                            name="itemName"
+                            value={formData.itemName}
+                            onChange={handleFormChange}
                             placeholder="Item Name"
+                            required
                         />
                         <input
                             type="text"
                             name="itemNumber"
-                            value={selectedItem.itemNumber}
-                            onChange={handleInputChange}
+                            value={formData.itemNumber}
+                            onChange={handleFormChange}
                             placeholder="Item Number"
+                            required
                         />
                         <input
                             type="text"
                             name="stockAvailable"
-                            value={selectedItem.stockAvailable}
-                            onChange={handleInputChange}
+                            value={formData.stockAvailable}
+                            onChange={handleFormChange}
                             placeholder="Stock Available"
+                            required
                         />
                         <input
-                            type="text"
-                            name="pricePerUnit"
-                            value={selectedItem.pricePerUnit}
-                            onChange={handleInputChange}
+                            type="number"
+                            name="price"
+                            value={formData.price}
+                            onChange={handleFormChange}
                             placeholder="Price per Unit"
+                            required
                         />
                         <input
                             type="text"
                             name="specification"
-                            value={selectedItem.specification}
-                            onChange={handleInputChange}
+                            value={formData.specification}
+                            onChange={handleFormChange}
                             placeholder="Specification"
+                            required
                         />
-                        <button type="submit">Update Item</button>
-                        <button type="button" onClick={handleClose}>Cancel</button>
+                        <input
+                            type="file"
+                            accept="image/png, image/jpeg"
+                            multiple
+                            onChange={handleImageChange}
+                        />
+                        <button
+                            type="button"
+                            onClick={isEditing ? handleUpdateItem : handleAddItem}
+                        >
+                            {isEditing ? "Update Item" : "Add Item"}
+                        </button>
+                        <button type="button" onClick={resetForm}>Cancel</button>
                     </form>
+                )}
+                <div className="added-items">
+                    {items.map((item) => (
+                        <div key={item._id} className="added-item">
+                            <p>{item.itemName}</p>
+                            <button onClick={() => handleViewItem(item)}>View</button>
+                            <button onClick={() => handleEditItem(item)}>Edit</button>
+                            <button onClick={() => handleDeleteItem(item._id)}>Delete</button>
+                        </div>
+                    ))}
                 </div>
-            )}
-
-            {isViewMode && selectedItem && (
-                <div className="view-details">
-                    <h2>Item Details</h2>
-                    <p>Name: {selectedItem.name}</p>
-                    <p>Item Number: {selectedItem.itemNumber}</p>
-                    <p>Stock Available: {selectedItem.stockAvailable}</p>
-                    <p>Price: {selectedItem.pricePerUnit}</p>
-                    <p>Specification: {selectedItem.specification}</p>
-                    <button onClick={handleClose}>Close Details</button>
-                </div>
-            )}
-
-            {/* Quotation Section */}
-            <div className="quotation-section">
-                <h2>Quotation</h2>
-                <button>Generate Quotation</button>
-                <button>Save Quotation</button>
-                <button>Print Quotation</button>
+            </div>
+            <div className="right-side">
+                {showDetails ? (
+                    <div>
+                        <h3>Item Details</h3>
+                        <p>Name: {showDetails.itemName}</p>
+                        <p>Item Number: {showDetails.itemNumber}</p>
+                        <p>Stock Available: {showDetails.stockAvailable}</p>
+                        <p>Price: {showDetails.price}</p>
+                        <p>Specification: {showDetails.specification}</p>
+                        <div>
+                            {showDetails.images.map((img, idx) => (
+                                <img key={idx} src={`http://localhost:5000/api/assemble/image/${showDetails._id}`} alt="item" />
+                            ))}
+                        </div>
+                        <button onClick={() => setShowDetails(null)}>Close Details</button>
+                    </div>
+                ) : (
+                    <div>
+                        <h2>Quotation</h2>
+                        <p>Quotation No: <span style={{ color: 'grey' }}>{quotationNumber}</span></p>
+                        <QRCodeCanvas value={quotationNumber} size={128} />
+                    </div>
+                )}
             </div>
         </div>
     );
