@@ -1,31 +1,15 @@
-// routes/assembleRoutes.js
 const express = require('express');
-const multer = require('multer'); // Used to handle file uploads
-const {
-    createAssemble,
-    getAssembles,
-    updateAssemble,
-    deleteAssemble
-} = require('../controllers/assembleController'); // Import the controller functions
-
 const router = express.Router();
+const assembleController = require('../controllers/assembleController');
+const multer = require('multer');
 
-// Set up multer storage for images
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // Store uploaded files in the "uploads" folder
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}_${file.originalname}`);
-    }
-});
+const upload = multer({ dest: 'uploads/' }); // Define file upload destination
 
-const upload = multer({ storage });
-
-// Define the routes
-router.post('/', upload.array('images'), createAssemble);  // Add new assemble item (with images)
-router.get('/', getAssembles);  // Get all assemble items
-router.put('/:id', upload.array('images'), updateAssemble);  // Update an assemble item
-router.delete('/:id', deleteAssemble);  // Delete an assemble item
+// Define routes for assemble operations
+router.post('/', upload.array('images', 5), assembleController.createAssemble);
+router.get('/', assembleController.getAssembles);
+router.get('/:id', assembleController.getAssembleById);
+router.put('/:id', upload.array('images', 5), assembleController.updateAssemble);
+router.delete('/:id', assembleController.deleteAssemble);
 
 module.exports = router;

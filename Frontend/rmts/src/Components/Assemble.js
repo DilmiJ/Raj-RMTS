@@ -256,26 +256,42 @@ const Assemble = () => {
                             </button>
                             <button onClick={() => handleEditItem(item)}>Update</button>
                             <button onClick={() => handleDeleteItem(item._id)}>Delete</button>
+                            <button onClick={() => setShowDetails(item)}>View</button>
+                            
+                            {showDetails && showDetails._id === item._id && (
+                                <div className="item-details">
+                                    <h3>Details:</h3>
+                                    <p><strong>Item Name:</strong> {item.itemName}</p>
+                                    <p><strong>Item Number:</strong> {item.itemNumber}</p>
+                                    <p><strong>Stock Available:</strong> {item.stockAvailable}</p>
+                                    <p><strong>Price:</strong> ${item.price}</p>
+                                    <p><strong>Specification:</strong> {item.specification}</p>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
             </div>
+
             <div className="right-side">
                 <h2>Quotation</h2>
-                <p>Quotation No: <span style={{ color: 'grey' }}>{quotationNumber}</span></p>
-                <QRCodeCanvas value={quotationNumber} size={128} />
-                <div className="quotation-buttons">
-                    <button onClick={handleDeleteQuotation}>Delete Quotation</button>
-                    <button onClick={handleCustomerDetails}>Customer Details</button>
-                    <button onClick={handleFinalView}>Final View</button>
+                <div className="quotation-number">
+                    <p>Quotation Number:</p>
+                    <QRCodeCanvas value={quotationNumber} />
+                    <p>{quotationNumber}</p>
                 </div>
                 <div className="quotation-items">
                     {quotation.map((item, index) => (
                         <div key={index} className="quotation-item">
-                            {item.itemName} - Quantity: {item.quantity} - Total: ${item.total}
+                            <span>{item.itemName}</span>
+                            <span>Qty: {item.quantity}</span>
+                            <span>Total: ${item.total}</span>
                         </div>
                     ))}
                 </div>
+                <button onClick={handleDeleteQuotation}>Delete Quotation</button>
+                <button onClick={handleCustomerDetails}>Customer Details</button>
+                <button onClick={handleFinalView}>View Final Quotation</button>
             </div>
         </div>
     );
