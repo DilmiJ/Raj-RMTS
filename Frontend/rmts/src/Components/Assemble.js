@@ -16,19 +16,29 @@ const Assemble = () => {
     });
     const [showForm, setShowForm] = useState(false);
     const [showDetails, setShowDetails] = useState(null);
+<<<<<<< HEAD
     const [quotation, setQuotation] = useState([]);
     const [quotationNumber] = useState(`RMTS-${Math.floor(Math.random() * 100000)}`);
     const navigate = useNavigate();
+=======
+    const [isEditing, setIsEditing] = useState(false);
+    const [selectedItemId, setSelectedItemId] = useState(null);
+    const [quotationNumber] = useState(`RMTS-${Math.floor(Math.random() * 100000)}`);
+>>>>>>> b1615bd81032cdb9471e0d369e3ce6eff58c982a
 
     useEffect(() => {
         const fetchItems = async () => {
             try {
                 const response = await axios.get('http://localhost:5000/api/assemble');
+<<<<<<< HEAD
                 if (Array.isArray(response.data)) {
                     setItems(response.data);
                 } else {
                     console.error('Received data is not an array:', response.data);
                 }
+=======
+                setItems(response.data);
+>>>>>>> b1615bd81032cdb9471e0d369e3ce6eff58c982a
             } catch (error) {
                 console.error('Error fetching items from database:', error);
             }
@@ -43,6 +53,7 @@ const Assemble = () => {
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
+<<<<<<< HEAD
         const validImages = files.filter(file =>
             file.type === 'image/png' || file.type === 'image/jpeg'
         );
@@ -85,6 +96,40 @@ const Assemble = () => {
             return;
         }
 
+=======
+        setFormData((prev) => ({ ...prev, images: files }));
+    };
+
+    const saveItemToDatabase = async (item) => {
+        try {
+            const formDataToSend = new FormData();
+            Object.keys(item).forEach(key => {
+                if (key !== 'images') {
+                    formDataToSend.append(key, item[key]);
+                } else {
+                    item.images.forEach(image => {
+                        formDataToSend.append('images', image);
+                    });
+                }
+            });
+
+            formDataToSend.forEach((value, key) => {
+                console.log(key, value);
+            });
+
+            const response = await axios.post('http://localhost:5000/api/assemble', formDataToSend, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+
+            return response.data;
+        } catch (error) {
+            console.error('Error saving item to database:', error);
+            alert('Error saving item to database');
+        }
+    };
+
+    const handleAddItem = async () => {
+>>>>>>> b1615bd81032cdb9471e0d369e3ce6eff58c982a
         const newItem = { ...formData, quantity: 1, total: formData.price };
         const savedItem = await saveItemToDatabase(newItem);
         if (savedItem) {
@@ -93,6 +138,34 @@ const Assemble = () => {
         }
     };
 
+<<<<<<< HEAD
+=======
+    const handleUpdateItem = async () => {
+        const updatedItem = { ...formData, quantity: 1, total: formData.price };
+        try {
+            const formDataToSend = new FormData();
+            Object.keys(updatedItem).forEach(key => {
+                if (key !== 'images') {
+                    formDataToSend.append(key, updatedItem[key]);
+                } else {
+                    updatedItem.images.forEach(image => {
+                        formDataToSend.append('images', image);
+                    });
+                }
+            });
+
+            const response = await axios.put(`http://localhost:5000/api/assemble/${selectedItemId}`, formDataToSend, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            setItems((prev) => prev.map((item) => (item._id === selectedItemId ? response.data : item)));
+            resetForm();
+        } catch (error) {
+            console.error('Error updating item in database:', error);
+            alert('Error updating item');
+        }
+    };
+
+>>>>>>> b1615bd81032cdb9471e0d369e3ce6eff58c982a
     const resetForm = () => {
         setFormData({
             itemName: '',
@@ -103,6 +176,7 @@ const Assemble = () => {
             images: [],
         });
         setShowForm(false);
+<<<<<<< HEAD
     };
 
     const handleDeleteItem = async (id) => {
@@ -113,6 +187,10 @@ const Assemble = () => {
             console.error('Error deleting item:', error);
             alert('Error deleting item: ' + (error.response?.data.message || error.message));
         }
+=======
+        setIsEditing(false);
+        setSelectedItemId(null);
+>>>>>>> b1615bd81032cdb9471e0d369e3ce6eff58c982a
     };
 
     const handleEditItem = (item) => {
@@ -125,6 +203,7 @@ const Assemble = () => {
             images: item.images || [],
         });
         setShowForm(true);
+<<<<<<< HEAD
         setShowDetails(item);
     };
 
@@ -184,13 +263,38 @@ const Assemble = () => {
 
     const handleFinalView = () => {
         navigate('/final-view');
+=======
+        setIsEditing(true);
+        setSelectedItemId(item._id);
+    };
+
+    const handleViewItem = (item) => {
+        setShowDetails(item);
+    };
+
+    const handleDeleteItem = async (id) => {
+        try {
+            await axios.delete(`http://localhost:5000/api/assemble/${id}`);
+            setItems((prev) => prev.filter((item) => item._id !== id));
+        } catch (error) {
+            console.error('Error deleting item:', error);
+            alert('Error deleting item');
+        }
+>>>>>>> b1615bd81032cdb9471e0d369e3ce6eff58c982a
     };
 
     return (
         <div className="assemble-container">
             <div className="left-side">
+<<<<<<< HEAD
                 <h2>Add Custom Item</h2>
                 <button onClick={() => setShowForm(!showForm)}>Add Item</button>
+=======
+                <h2>{isEditing ? "Update Item" : "Add Custom Item"}</h2>
+                <button onClick={() => setShowForm(!showForm)}>
+                    {showForm ? "Close Form" : "Add Item"}
+                </button>
+>>>>>>> b1615bd81032cdb9471e0d369e3ce6eff58c982a
                 {showForm && (
                     <form className="custom-item-form">
                         <input
@@ -239,13 +343,23 @@ const Assemble = () => {
                             multiple
                             onChange={handleImageChange}
                         />
+<<<<<<< HEAD
                         <button type="button" onClick={handleAddItem}>Add Item</button>
+=======
+                        <button
+                            type="button"
+                            onClick={isEditing ? handleUpdateItem : handleAddItem}
+                        >
+                            {isEditing ? "Update Item" : "Add Item"}
+                        </button>
+>>>>>>> b1615bd81032cdb9471e0d369e3ce6eff58c982a
                         <button type="button" onClick={resetForm}>Cancel</button>
                     </form>
                 )}
                 <div className="added-items">
                     {items.map((item) => (
                         <div key={item._id} className="added-item">
+<<<<<<< HEAD
                             <img
                                 src={item.images[0] ? `uploads/${item.images[0]}` : '/placeholder.png'}
                                 alt={item.itemName}
@@ -268,10 +382,17 @@ const Assemble = () => {
                                     <p><strong>Specification:</strong> {item.specification}</p>
                                 </div>
                             )}
+=======
+                            <p>{item.itemName}</p>
+                            <button onClick={() => handleViewItem(item)}>View</button>
+                            <button onClick={() => handleEditItem(item)}>Edit</button>
+                            <button onClick={() => handleDeleteItem(item._id)}>Delete</button>
+>>>>>>> b1615bd81032cdb9471e0d369e3ce6eff58c982a
                         </div>
                     ))}
                 </div>
             </div>
+<<<<<<< HEAD
 
             <div className="right-side">
                 <h2>Quotation</h2>
@@ -292,6 +413,31 @@ const Assemble = () => {
                 <button onClick={handleDeleteQuotation}>Delete Quotation</button>
                 <button onClick={handleCustomerDetails}>Customer Details</button>
                 <button onClick={handleFinalView}>View Final Quotation</button>
+=======
+            <div className="right-side">
+                {showDetails ? (
+                    <div>
+                        <h3>Item Details</h3>
+                        <p>Name: {showDetails.itemName}</p>
+                        <p>Item Number: {showDetails.itemNumber}</p>
+                        <p>Stock Available: {showDetails.stockAvailable}</p>
+                        <p>Price: {showDetails.price}</p>
+                        <p>Specification: {showDetails.specification}</p>
+                        <div>
+                            {showDetails.images.map((img, idx) => (
+                                <img key={idx} src={`http://localhost:5000/api/assemble/image/${showDetails._id}`} alt="item" />
+                            ))}
+                        </div>
+                        <button onClick={() => setShowDetails(null)}>Close Details</button>
+                    </div>
+                ) : (
+                    <div>
+                        <h2>Quotation</h2>
+                        <p>Quotation No: <span style={{ color: 'grey' }}>{quotationNumber}</span></p>
+                        <QRCodeCanvas value={quotationNumber} size={128} />
+                    </div>
+                )}
+>>>>>>> b1615bd81032cdb9471e0d369e3ce6eff58c982a
             </div>
         </div>
     );
