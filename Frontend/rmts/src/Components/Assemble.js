@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import '../css/Assemble.css';
 import { QRCodeCanvas } from 'qrcode.react';
 import axios from 'axios';
-//k
+import { useNavigate } from 'react-router-dom';
+
 const Assemble = () => {
     const [items, setItems] = useState([]);
     const [formData, setFormData] = useState({
@@ -18,6 +19,8 @@ const Assemble = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [selectedItemId, setSelectedItemId] = useState(null);
     const [quotationNumber] = useState(`RMTS-${Math.floor(Math.random() * 100000)}`);
+    const [quotation, setQuotation] = useState([]); // Replaced `quotationItems`
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchItems = async () => {
@@ -52,10 +55,6 @@ const Assemble = () => {
                         formDataToSend.append('images', image);
                     });
                 }
-            });
-
-            formDataToSend.forEach((value, key) => {
-                console.log(key, value);
             });
 
             const response = await axios.post('http://localhost:5000/api/assemble', formDataToSend, {
@@ -145,6 +144,31 @@ const Assemble = () => {
         }
     };
 
+    const handleAddToQuotation = (item) => {
+        const existingItem = quotation.find((q) => q.itemNumber === item.itemNumber);
+        if (existingItem) {
+            setQuotation((prev) =>
+                prev.map((q) =>
+                    q.itemNumber === item.itemNumber ? { ...q, quantity: q.quantity + 1, total: q.total + item.price } : q
+                )
+            );
+        } else {
+            setQuotation((prev) => [...prev, { ...item, quantity: 1, total: item.price }]);
+        }
+    };
+
+    const handleDeleteQuotation = () => {
+        setQuotation([]);
+    };
+
+    const handleCustomerDetails = () => {
+        navigate('/customer-details');
+    };
+
+    const handleFinalView = () => {
+        navigate('/monitor-view');
+    };
+
     return (
         <div className="assemble-container">
             <div className="left-side">
@@ -216,6 +240,7 @@ const Assemble = () => {
                             <button onClick={() => handleViewItem(item)}>View</button>
                             <button onClick={() => handleEditItem(item)}>Edit</button>
                             <button onClick={() => handleDeleteItem(item._id)}>Delete</button>
+                            <button onClick={() => handleAddToQuotation(item)}>+</button>
                         </div>
                     ))}
                 </div>
@@ -241,6 +266,20 @@ const Assemble = () => {
                         <h2>Quotation</h2>
                         <p>Quotation No: <span style={{ color: 'grey' }}>{quotationNumber}</span></p>
                         <QRCodeCanvas value={quotationNumber} size={128} />
+                        <div className="quotation-buttons">
+                            <button onClick={handleDeleteQuotation}>Delete Quotation</button>
+                            <button onClick={handleCustomerDetails}>Customer Details</button>
+                            <button onClick={handleFinalView}>View Final Quotation</button>
+                        </div>
+                        <div className="quotation-items">
+                            {quotation.map((q, idx) => (
+                                <div key={idx}>
+                                    <p>{q.itemName}</p>
+                                    <p>Quantity: {q.quantity}</p>
+                                    <p>Total: {q.total}</p>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>
