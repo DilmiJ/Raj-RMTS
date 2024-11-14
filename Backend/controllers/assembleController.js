@@ -1,7 +1,7 @@
 const Assemble = require('../models/assembleModel');
 
 // Create a new assemble item (with image buffer)
-
+//k
 const createAssemble = async (req, res) => {
     try {
         const { itemName, itemNumber, stockAvailable, price, specification } = req.body;

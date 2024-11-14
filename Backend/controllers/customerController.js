@@ -1,5 +1,5 @@
 const Customer = require('../models/customerModel');
-
+//k
 // Get all customers
 exports.getCustomers = async (req, res) => {
   try {

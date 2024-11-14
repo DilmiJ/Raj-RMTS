@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const { createAssemble, getAssembles, updateAssemble, deleteAssemble, getImage } = require('../controllers/assembleController');
-
+//k
 const router = express.Router();
 
 // Set up multer storage for images

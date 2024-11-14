@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../css/Assemble.css';
 import { QRCodeCanvas } from 'qrcode.react';
 import axios from 'axios';
-
+//k
 const Assemble = () => {
     const [items, setItems] = useState([]);
     const [formData, setFormData] = useState({

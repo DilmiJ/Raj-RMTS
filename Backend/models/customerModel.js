@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');// form structure 
-
+//k
 const customerSchema = new mongoose.Schema({
     customerName: {
         type: String,
