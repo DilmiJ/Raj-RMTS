@@ -94,6 +94,7 @@ const Assemble = () => {
         if (!itemName || !itemNumber || !stockAvailable || !price || !specification) {
             alert('Please fill in all fields');
             return;
+            
         }
 
 =======
