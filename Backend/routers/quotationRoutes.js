@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { createQuotation } = require('../controllers/quotationController');
+const { saveQuotation } = require('../controllers/quotationController');
 
-router.post('/quotation', createQuotation);
+// Define the route correctly
+router.post('/save', saveQuotation);
 
 module.exports = router;

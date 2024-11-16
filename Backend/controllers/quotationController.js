@@ -1,18 +1,34 @@
-const Quotation = require('../models/Quotation');
+const Quotation = require('../models/quotationModel');
 
-exports.createQuotation = async (req, res) => {
+// Controller function to save quotation
+const saveQuotation = async (req, res) => {
     try {
-        const { invoiceNumber, items, totalAmount } = req.body;
+        const { quotationNumber, items } = req.body;
 
+        // Validate data
+        if (!quotationNumber || !items || items.length === 0) {
+            return res.status(400).json({ message: 'Quotation number and items are required.' });
+        }
+
+        // Check if the quotation number already exists
+        const existingQuotation = await Quotation.findOne({ quotationNumber });
+        if (existingQuotation) {
+            return res.status(400).json({ message: 'Quotation number already exists.' });
+        }
+
+        // Create a new quotation
         const newQuotation = new Quotation({
-            invoiceNumber,
-            items,
-            totalAmount
+            quotationNumber,
+            items
         });
 
+        // Save the quotation to the database
         await newQuotation.save();
-        res.status(201).json(newQuotation);
+        return res.status(200).json({ message: 'Quotation saved successfully!', data: newQuotation });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error(error);
+        return res.status(500).json({ message: 'Error saving quotation.', error });
     }
 };
+
+module.exports = { saveQuotation };

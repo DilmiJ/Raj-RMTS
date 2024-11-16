@@ -19,7 +19,9 @@ const Assemble = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [selectedItemId, setSelectedItemId] = useState(null);
     const [quotationNumber] = useState(`RMTS-${Math.floor(Math.random() * 100000)}`);
-    const [quotation, setQuotation] = useState([]); // Replaced `quotationItems`
+    
+
+    const [quotation, setQuotation] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -114,6 +116,7 @@ const Assemble = () => {
         setShowForm(false);
         setIsEditing(false);
         setSelectedItemId(null);
+        setShowDetails(null);
     };
 
     const handleEditItem = (item) => {
@@ -157,6 +160,10 @@ const Assemble = () => {
         }
     };
 
+    const handleDeleteQuotationItem = (itemNumber) => {
+        setQuotation((prev) => prev.filter((item) => item.itemNumber !== itemNumber));
+    };
+
     const handleDeleteQuotation = () => {
         setQuotation([]);
     };
@@ -168,6 +175,25 @@ const Assemble = () => {
     const handleFinalView = () => {
         navigate('/monitor-view');
     };
+
+    const handleSaveQuotation = async () => {
+        const quotationData = {
+            quotationNumber,
+            items: quotation,
+        };
+    
+        try {
+            const response = await axios.post('http://localhost:5000/api/quotations/save', quotationData);
+            if (response.status === 200) {
+                alert('Quotation saved successfully!');
+            }
+        } catch (error) {
+            console.error('Error saving quotation:', error.response?.data || error.message);
+            alert('Error saving quotation');
+        }
+    };
+    
+    
 
     return (
         <div className="assemble-container">
@@ -236,6 +262,7 @@ const Assemble = () => {
                 <div className="added-items">
                     {items.map((item) => (
                         <div key={item._id} className="added-item">
+                            <img src={`http://localhost:5000/api/assemble/image/${item._id}`} alt="item" className="item-image" />
                             <p>{item.itemName}</p>
                             <button onClick={() => handleViewItem(item)}>View</button>
                             <button onClick={() => handleEditItem(item)}>Edit</button>
@@ -244,44 +271,57 @@ const Assemble = () => {
                         </div>
                     ))}
                 </div>
-            </div>
-            <div className="right-side">
-                {showDetails ? (
-                    <div>
+                {showDetails && (
+                    <div className="item-details">
                         <h3>Item Details</h3>
                         <p>Name: {showDetails.itemName}</p>
                         <p>Item Number: {showDetails.itemNumber}</p>
                         <p>Stock Available: {showDetails.stockAvailable}</p>
                         <p>Price: {showDetails.price}</p>
                         <p>Specification: {showDetails.specification}</p>
-                        <div>
-                            {showDetails.images.map((img, idx) => (
-                                <img key={idx} src={`http://localhost:5000/api/assemble/image/${showDetails._id}`} alt="item" />
-                            ))}
-                        </div>
-                        <button onClick={() => setShowDetails(null)}>Close Details</button>
-                    </div>
-                ) : (
-                    <div>
-                        <h2>Quotation</h2>
-                        <p>Quotation No: <span style={{ color: 'grey' }}>{quotationNumber}</span></p>
-                        <QRCodeCanvas value={quotationNumber} size={128} />
-                        <div className="quotation-buttons">
-                            <button onClick={handleDeleteQuotation}>Delete Quotation</button>
-                            <button onClick={handleCustomerDetails}>Customer Details</button>
-                            <button onClick={handleFinalView}>View Final Quotation</button>
-                        </div>
-                        <div className="quotation-items">
-                            {quotation.map((q, idx) => (
-                                <div key={idx}>
-                                    <p>{q.itemName}</p>
-                                    <p>Quantity: {q.quantity}</p>
-                                    <p>Total: {q.total}</p>
-                                </div>
-                            ))}
-                        </div>
+                        <img src={`http://localhost:5000/api/assemble/image/${showDetails._id}`} alt="item" className="item-image" />
                     </div>
                 )}
+            </div>
+
+            <div className="right-side">
+                <div className="quotation">
+                    <h3>Quotation - {quotationNumber}</h3>
+                    <div className="quotation-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Item Name</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {quotation.map((item) => (
+                                    <tr key={item.itemNumber}>
+                                        <td>{item.itemName}</td>
+                                        <td>{item.price}</td>
+                                        <td>{item.quantity}</td>
+                                        <td>{item.total}</td>
+                                        <td>
+                                            <button onClick={() => handleDeleteQuotationItem(item.itemNumber)}>
+                                                Remove
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="quotation-footer">
+                        <button onClick={handleDeleteQuotation}>Clear</button>
+                        <button onClick={handleSaveQuotation}>Save Quotation</button>
+                        <button onClick={handleCustomerDetails}>Proceed to Customer</button>
+                        <button onClick={handleFinalView}>Final View</button>
+                    </div>
+                </div>
             </div>
         </div>
     );
