@@ -4,7 +4,9 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const assembleRoutes = require('./routers/assembleRoutes'); // Adjust path if necessary
 const customerRoutes = require('./routers/customerRoutes'); // Adjust path if necessary
-const quotationRoutes= require('./routers/quotationRoutes')
+const quotationRoutes= require('./routers/quotationRoutes');
+const itemRoutes = require('./routers/itemRoutes');
+const jobRoutes = require('./routers/jobRoutes');
 
 const app = express();
 const PORT = 5000;
@@ -17,6 +19,8 @@ app.use(express.json()); // Parses incoming JSON requests
 app.use('/api/assemble', assembleRoutes); // Use assemble routes
 app.use('/api/customer-details', customerRoutes); // Use customer routes
 app.use('/api/quotations', quotationRoutes);
+app.use('/api/items', itemRoutes);  // For items CRUD
+app.use('/api/jobs', jobRoutes);    // For jobs CRUD
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { 

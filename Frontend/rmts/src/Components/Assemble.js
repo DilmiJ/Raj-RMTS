@@ -5,6 +5,10 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Assemble = () => {
+    const [discount, setDiscount] = useState(0);
+    const [discountPercentage, setDiscountPercentage] = useState(0);
+
+
     const [items, setItems] = useState([]);
     const [formData, setFormData] = useState({
         itemName: '',
@@ -285,44 +289,81 @@ const Assemble = () => {
             </div>
 
             <div className="right-side">
-                <div className="quotation">
-                    <h3>Quotation - {quotationNumber}</h3>
-                    <div className="quotation-table">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Item Name</th>
-                                    <th>Price</th>
-                                    <th>Quantity</th>
-                                    <th>Total</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {quotation.map((item) => (
-                                    <tr key={item.itemNumber}>
-                                        <td>{item.itemName}</td>
-                                        <td>{item.price}</td>
-                                        <td>{item.quantity}</td>
-                                        <td>{item.total}</td>
-                                        <td>
-                                            <button onClick={() => handleDeleteQuotationItem(item.itemNumber)}>
-                                                Remove
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div className="quotation-footer">
-                        <button onClick={handleDeleteQuotation}>Clear</button>
-                        <button onClick={handleSaveQuotation}>Save Quotation</button>
-                        <button onClick={handleCustomerDetails}>Proceed to Customer</button>
-                        <button onClick={handleFinalView}>Final View</button>
-                    </div>
-                </div>
+    <div className="quotation">
+        <h3>Quotation - {quotationNumber}</h3>
+
+        {/* QR Code Section */}
+        <div className="qr-code-section">
+            <h4>QR Code</h4>
+            <QRCodeCanvas
+                value={JSON.stringify({
+                    quotationNumber,
+                    items: quotation.map(({ itemName, quantity, total }) => ({ itemName, quantity, total })),
+                })}
+                size={128} // QR code size
+                bgColor={"#ffffff"} // Background color
+                fgColor={"#000000"} // Foreground color
+                level={"H"} // Error correction level
+            />
+        </div>
+
+        <div className="quotation-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {quotation.map((item) => (
+                        <tr key={item.itemNumber}>
+                            <td>{item.itemName}</td>
+                            <td>{item.price}</td>
+                            <td>{item.quantity}</td>
+                            <td>{item.total}</td>
+                            <td>
+                                <button onClick={() => handleDeleteQuotationItem(item.itemNumber)}>
+                                    Remove
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+
+        {/* Summary Section */}
+        <div className="quotation-summary">
+            <h4>Total Amount: LKR {quotation.reduce((sum, item) => sum + item.total, 0)}</h4>
+            <div className="discount-section">
+                <label htmlFor="discount">Discount (%):</label>
+                <input
+                    type="number"
+                    id="discount"
+                    placeholder="Enter discount percentage"
+                    onChange={(e) => setDiscountPercentage(Number(e.target.value))}
+                    value={discountPercentage}
+                />
             </div>
+            <h4>Net Amount: LKR {(quotation.reduce((sum, item) => sum + item.total, 0) * (1 - discountPercentage / 100)).toFixed(2)}</h4>
+        </div>
+
+        {/* Quotation Footer */}
+        <div className="quotation-footer">
+            <button onClick={handleDeleteQuotation}>Clear</button>
+            <button onClick={handleSaveQuotation}>Save Quotation</button>
+            <button onClick={handleCustomerDetails}>Proceed to Customer</button>
+            <button onClick={handleFinalView}>Final View</button>
+        </div>
+    </div>
+</div>
+
+
+
         </div>
     );
 };
