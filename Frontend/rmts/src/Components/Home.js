@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
 import '../css/Home.css'; // Importing the CSS file
 
 const Home = () => {
   const [loading, setLoading] = useState(true); // State for loading effect
+  const navigate = useNavigate(); // Hook for programmatic navigation
 
   // Simulate loading effect with useEffect hook
   useEffect(() => {
@@ -32,19 +34,19 @@ const Home = () => {
       {/* Main content with buttons */}
       <main>
         <div className="button-container">
-          <div className="button" id="assemble" onClick={() => window.location.href='/assemble'}>
+          <div className="button" id="assemble" onClick={() => navigate('/assemble')}>
             <span className="icon">➕</span>
             <span>Assemble</span>
           </div>
-          <div className="button" id="service" onClick={() => window.location.href='/service'}>
+          <div className="button" id="service" onClick={() => navigate('/service')}>
             <span className="icon">🔩</span>
             <span>Service</span>
           </div>
-          <div className="button" id="repair" onClick={() => window.location.href='/repair'}>
+          <div className="button" id="repair" onClick={() => navigate('/repair')}>
             <span className="icon">🛠️</span>
             <span>Repairing</span>
           </div>
-          <div className="button" id="breakdown" onClick={() => window.location.href='/breakdown'}>
+          <div className="button" id="breakdown" onClick={() => navigate('/breakdown')}>
             <span className="icon">⚙️</span>
             <span>Breakdown</span>
           </div>
