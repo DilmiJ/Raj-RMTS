@@ -1,136 +1,104 @@
-// Import the Assemble model
-const Assemble = require('../models/assembleModels');
 
-// Create a new assemble item
-exports.createAssemble = async (req, res) => {
+
+// Create a new assemble item (with image buffer)
+
+const Assemble = require('../models/assembleModels');
+const createAssemble = async (req, res) => {
     try {
         const { itemName, itemNumber, stockAvailable, price, specification } = req.body;
+        const images = req.files.map((file) => ({
+            data: file.buffer,  // Store image as buffer
+            contentType: file.mimetype,
+        }));
 
-        // Check if all required fields are provided
-        if (!itemName || !itemNumber || !stockAvailable || !price || !specification) {
-            return res.status(400).send({ message: 'All fields are required' });
-        }
+        console.log('Request Body:', req.body);
+        console.log('Request Files:', req.files);
 
-        // Handle uploaded images if any
-        const images = req.files && req.files.length ? req.files.map(file => file.path) : [];
+        const newAssemble = new Assemble({
+            itemName,
+            itemNumber,
+            stockAvailable,
+            price,
+            specification,
+            images,
+        });
 
-        // Create a new assemble item
-        const newAssemble = new Assemble({ itemName, itemNumber, stockAvailable, price, specification, images });
-
-        // Save the new assemble item to the database
-        const savedAssemble = await newAssemble.save();
-        res.status(201).send({ message: 'Assemble item created successfully', data: savedAssemble });
+        await newAssemble.save();
+        res.status(201).json(newAssemble);
     } catch (error) {
-        console.error('Error creating assemble item:', error);
-        res.status(500).send({ message: 'Failed to create assemble item', error });
+        console.error("Error details:", error);
+        res.status(500).json({ message: 'Error creating assemble item', error: error.message });
     }
 };
+
 
 // Get all assemble items
-exports.getAssembles = async (req, res) => {
+const getAssembles = async (req, res) => {
     try {
         const assembles = await Assemble.find();
-        res.status(200).send({ message: 'List of assembles', data: assembles });
+        res.status(200).json(assembles);
     } catch (error) {
-        console.error('Error fetching assembles:', error);
-        res.status(500).send({ message: 'Failed to get assembles', error });
+        console.error(error);
+        res.status(500).json({ message: 'Error fetching assemble items' });
     }
 };
 
-// Get assemble item by ID
-exports.getAssembleById = async (req, res) => {
+// Get image for a specific assemble item
+const getImage = async (req, res) => {
     try {
-        const { id } = req.params;
-        const assemble = await Assemble.findById(id);
-
-        // Check if the item exists
-        if (!assemble) {
-            return res.status(404).send({ message: `Assemble item with ID ${id} not found` });
+        const assemble = await Assemble.findById(req.params.id);
+        if (!assemble || !assemble.images.length) {
+            return res.status(404).json({ message: 'Image not found' });
         }
-
-        res.status(200).send({ message: 'Assemble item found', data: assemble });
+        const image = assemble.images[0]; // Assuming only one image
+        res.contentType(image.contentType);
+        res.send(image.data);
     } catch (error) {
-        console.error('Error fetching assemble item by ID:', error);
-        res.status(500).send({ message: 'Failed to fetch assemble item', error });
+        console.error(error);
+        res.status(500).json({ message: 'Error fetching image' });
     }
 };
 
-// Update an assemble item by ID
-exports.updateAssemble = async (req, res) => {
+// Update an existing assemble item
+const updateAssemble = async (req, res) => {
     try {
-        const { id } = req.params;
         const { itemName, itemNumber, stockAvailable, price, specification } = req.body;
+        const images = req.files.map((file) => ({
+            data: file.buffer,
+            contentType: file.mimetype,
+        }));
 
-        // Check if all required fields are provided
-        if (!itemName || !itemNumber || !stockAvailable || !price || !specification) {
-            return res.status(400).send({ message: 'All fields are required' });
-        }
-
-        // Handle updated images if any
-        const images = req.files && req.files.length ? req.files.map(file => file.path) : [];
-        const updatedData = { itemName, itemNumber, stockAvailable, price, specification, images };
-
-        // Update the assemble item
-        const updatedAssemble = await Assemble.findByIdAndUpdate(id, updatedData, { new: true });
-        if (!updatedAssemble) {
-            return res.status(404).send({ message: `Assemble item with ID ${id} not found` });
-        }
-
-        res.status(200).send({ message: `Assemble item with ID ${id} updated successfully`, data: updatedAssemble });
-    } catch (error) {
-        console.error('Error updating assemble item:', error);
-        res.status(500).send({ message: 'Failed to update assemble item', error });
-    }
-};
-
-// Delete an assemble item by ID
-exports.deleteAssemble = async (req, res) => {
-    try {
-        const { id } = req.params;
-
-        // Delete the assemble item
-        const deletedAssemble = await Assemble.findByIdAndDelete(id);
-        if (!deletedAssemble) {
-            return res.status(404).send({ message: `Assemble item with ID ${id} not found` });
-        }
-
-        res.status(200).send({ message: `Assemble item with ID ${id} deleted successfully` });
-    } catch (error) {
-        console.error('Error deleting assemble item:', error);
-        res.status(500).send({ message: 'Failed to delete assemble item', error });
-    }
-};
-
-// Create or update quotation
-exports.createQuotation = async (req, res) => {
-    try {
-        const { quotationItems, quotationNumber } = req.body;
-
-        // Check if all required fields are provided
-        if (!quotationItems || !quotationItems.length || !quotationNumber) {
-            return res.status(400).send({ message: 'Quotation number and items are required' });
-        }
-
-        // Save quotation details in the database
-        const savedQuotation = await Assemble.updateOne(
-            { quotationNumber },
-            { $set: { quotationItems } },
-            { upsert: true, new: true }
+        const updatedAssemble = await Assemble.findByIdAndUpdate(
+            req.params.id,
+            { itemName, itemNumber, stockAvailable, price, specification, images },
+            { new: true }
         );
 
-        res.status(200).send({ message: 'Quotation saved successfully', data: savedQuotation });
+        if (!updatedAssemble) {
+            return res.status(404).json({ message: 'Item not found' });
+        }
+
+        res.status(200).json(updatedAssemble);
     } catch (error) {
-        console.error('Error saving quotation:', error);
-        res.status(500).send({ message: 'Failed to save quotation', error });
+        console.error(error);
+        res.status(500).json({ message: 'Error updating assemble item' });
     }
 };
 
-// Export all controller functions
-module.exports = {
-    createAssemble,
-    getAssembles,
-    getAssembleById,
-    updateAssemble,
-    deleteAssemble,
-    createQuotation
+// Delete an assemble item
+const deleteAssemble = async (req, res) => {
+    try {
+        const deletedAssemble = await Assemble.findByIdAndDelete(req.params.id);
+
+        if (!deletedAssemble) {
+            return res.status(404).json({ message: 'Item not found' });
+        }
+
+        res.status(200).json({ message: 'Item deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error deleting assemble item' });
+    }
 };
+
+module.exports = { createAssemble, getAssembles, updateAssemble, deleteAssemble, getImage };

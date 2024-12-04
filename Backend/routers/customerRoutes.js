@@ -17,3 +17,4 @@ router.put('/:id', updateCustomer); // Update a customer by ID
 router.delete('/:id', deleteCustomer); // Delete a customer by ID
 
 module.exports = router;
+//k
