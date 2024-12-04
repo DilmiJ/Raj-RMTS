@@ -1,92 +1,87 @@
-/* Styling for JobSelectionPart component */
-.job-selection-part {
-    background-color: #1c1c1e;
-    color: #f5f5f5;
-    max-width: 600px;
-    margin: 40px auto;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  
-  h1 {
-    color: #ff9500;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .button-group {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 20px;
-  }
-  
-  .tab-button {
-    padding: 10px 20px;
-    background-color: #2c2c2e;
-    color: #f5f5f5;
-    border: 2px solid #2c2c2e;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s, border-color 0.3s;
-  }
-  
-  .tab-button.active,
-  .tab-button:hover {
-    background-color: #ff9500;
-    border-color: #ff9500;
-    color: #1c1c1e;
-  }
-  
-  .tab-content {
-    background-color: #2c2c2e;
-    padding: 20px;
-    border-radius: 8px;
-  }
-  
-  .job-details-form h2 {
-    color: #ff9500;
-    margin-bottom: 15px;
-  }
-  
-  .job-details-form label {
-    display: block;
-    margin-bottom: 10px;
-    color: #f5f5f5;
-  }
-  
-  .job-details-form input {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    border-radius: 4px;
-    border: 1px solid #555;
-    background-color: #333;
-    color: #f5f5f5;
-  }
-  
-  .submit-btn {
-    margin-top: 15px;
-    padding: 10px 15px;
-    background-color: #ff9500;
-    border: none;
-    border-radius: 4px;
-    color: #1c1c1e;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
-  }
-  
-  .submit-btn:hover {
-    background-color: #e58900;
-  }
-  
-  .item-details p {
-    color: #ff9500;
-    text-align: center;
-    font-size: 18px;
-    margin: 0;
-  }
-  
+/* jobSelection.css */
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: black;
+  color: white;
+}
+
+.job-selection-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.button-container {
+  margin-bottom: 20px;
+}
+
+.square-button {
+  background-color: #555555;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin: 0 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.square-button:hover {
+  background-color: #888888;
+}
+
+.submit-button {
+  background-color: orange;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-top: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #ffb74d;
+}
+
+.form-container {
+  background-color: #333333;
+  padding: 20px;
+  border-radius: 10px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.input {
+  margin-bottom: 10px;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #555555;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #444444;
+  color: white;
+}
+
+.input::placeholder {
+  color: #bbbbbb;
+}
+
+.input:focus {
+  outline: none;
+  border-color: orange;
+  background-color: #555555;
+}
+
+h3 {
+  margin-bottom: 15px;
+  color: orange;
+}

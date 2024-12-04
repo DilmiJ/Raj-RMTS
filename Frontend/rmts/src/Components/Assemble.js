@@ -5,6 +5,10 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Assemble = () => {
+    const [discount, setDiscount] = useState(0);
+    const [discountPercentage, setDiscountPercentage] = useState(0);
+
+
     const [items, setItems] = useState([]);
     const [formData, setFormData] = useState({
         itemName: '',
@@ -17,6 +21,12 @@ const Assemble = () => {
     const [showForm, setShowForm] = useState(false);
     const [quotation, setQuotation] = useState([]);
     const [quotationNumber] = useState(`RMTS-${Math.floor(Math.random() * 100000)}`);
+<<<<<<< HEAD
+=======
+    
+
+    const [quotation, setQuotation] = useState([]);
+>>>>>>> 25c64cc0d123cc25a7f3680eec5bbaec931feafa
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -60,6 +70,10 @@ const Assemble = () => {
                     item.images.forEach(image => formDataToSend.append('images', image));
                 }
             });
+<<<<<<< HEAD
+=======
+
+>>>>>>> 25c64cc0d123cc25a7f3680eec5bbaec931feafa
             const response = await axios.post('http://localhost:5000/api/assemble', formDataToSend, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
@@ -95,6 +109,30 @@ const Assemble = () => {
             images: [],
         });
         setShowForm(false);
+<<<<<<< HEAD
+=======
+        setIsEditing(false);
+        setSelectedItemId(null);
+        setShowDetails(null);
+    };
+
+    const handleEditItem = (item) => {
+        setFormData({
+            itemName: item.itemName,
+            itemNumber: item.itemNumber,
+            stockAvailable: item.stockAvailable,
+            price: item.price,
+            specification: item.specification,
+            images: item.images || [],
+        });
+        setShowForm(true);
+        setIsEditing(true);
+        setSelectedItemId(item._id);
+    };
+
+    const handleViewItem = (item) => {
+        setShowDetails(item);
+>>>>>>> 25c64cc0d123cc25a7f3680eec5bbaec931feafa
     };
 
     const handleDeleteItem = async (id) => {
@@ -120,6 +158,13 @@ const Assemble = () => {
         }
     };
 
+<<<<<<< HEAD
+=======
+    const handleDeleteQuotationItem = (itemNumber) => {
+        setQuotation((prev) => prev.filter((item) => item.itemNumber !== itemNumber));
+    };
+
+>>>>>>> 25c64cc0d123cc25a7f3680eec5bbaec931feafa
     const handleDeleteQuotation = () => {
         setQuotation([]);
     };
@@ -129,9 +174,34 @@ const Assemble = () => {
     };
 
     const handleFinalView = () => {
+<<<<<<< HEAD
         navigate('/final-view');
     };
 
+=======
+        navigate('/monitor-view');
+    };
+
+    const handleSaveQuotation = async () => {
+        const quotationData = {
+            quotationNumber,
+            items: quotation,
+        };
+    
+        try {
+            const response = await axios.post('http://localhost:5000/api/quotations/save', quotationData);
+            if (response.status === 200) {
+                alert('Quotation saved successfully!');
+            }
+        } catch (error) {
+            console.error('Error saving quotation:', error.response?.data || error.message);
+            alert('Error saving quotation');
+        }
+    };
+    
+    
+
+>>>>>>> 25c64cc0d123cc25a7f3680eec5bbaec931feafa
     return (
         <div className="assemble-container">
             <div className="left-side">
@@ -152,12 +222,21 @@ const Assemble = () => {
                 <div className="added-items">
                     {items.map((item) => (
                         <div key={item._id} className="added-item">
+<<<<<<< HEAD
                             <img src={item.images[0] ? `uploads/${item.images[0]}` : '/placeholder.png'} alt={item.itemName} className="item-image" />
                             <button onClick={() => handleAddToQuotation(item)}>{item.itemName}</button>
+=======
+                            <img src={`http://localhost:5000/api/assemble/image/${item._id}`} alt="item" className="item-image" />
+                            <p>{item.itemName}</p>
+                            <button onClick={() => handleViewItem(item)}>View</button>
+                            <button onClick={() => handleEditItem(item)}>Edit</button>
+>>>>>>> 25c64cc0d123cc25a7f3680eec5bbaec931feafa
                             <button onClick={() => handleDeleteItem(item._id)}>Delete</button>
+                            <button onClick={() => handleAddToQuotation(item)}>+</button>
                         </div>
                     ))}
                 </div>
+<<<<<<< HEAD
             </div>
             <div className="right-side">
                 <h2>Quotation</h2>
@@ -178,7 +257,97 @@ const Assemble = () => {
                 <button onClick={handleDeleteQuotation}>Delete Quotation</button>
                 <button onClick={handleCustomerDetails}>Customer Details</button>
                 <button onClick={handleFinalView}>View Final Quotation</button>
+=======
+                {showDetails && (
+                    <div className="item-details">
+                        <h3>Item Details</h3>
+                        <p>Name: {showDetails.itemName}</p>
+                        <p>Item Number: {showDetails.itemNumber}</p>
+                        <p>Stock Available: {showDetails.stockAvailable}</p>
+                        <p>Price: {showDetails.price}</p>
+                        <p>Specification: {showDetails.specification}</p>
+                        <img src={`http://localhost:5000/api/assemble/image/${showDetails._id}`} alt="item" className="item-image" />
+                    </div>
+                )}
+>>>>>>> 25c64cc0d123cc25a7f3680eec5bbaec931feafa
             </div>
+
+            <div className="right-side">
+    <div className="quotation">
+        <h3>Quotation - {quotationNumber}</h3>
+
+        {/* QR Code Section */}
+        <div className="qr-code-section">
+            <h4>QR Code</h4>
+            <QRCodeCanvas
+                value={JSON.stringify({
+                    quotationNumber,
+                    items: quotation.map(({ itemName, quantity, total }) => ({ itemName, quantity, total })),
+                })}
+                size={128} // QR code size
+                bgColor={"#ffffff"} // Background color
+                fgColor={"#000000"} // Foreground color
+                level={"H"} // Error correction level
+            />
+        </div>
+
+        <div className="quotation-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {quotation.map((item) => (
+                        <tr key={item.itemNumber}>
+                            <td>{item.itemName}</td>
+                            <td>{item.price}</td>
+                            <td>{item.quantity}</td>
+                            <td>{item.total}</td>
+                            <td>
+                                <button onClick={() => handleDeleteQuotationItem(item.itemNumber)}>
+                                    Remove
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+
+        {/* Summary Section */}
+        <div className="quotation-summary">
+            <h4>Total Amount: LKR {quotation.reduce((sum, item) => sum + item.total, 0)}</h4>
+            <div className="discount-section">
+                <label htmlFor="discount">Discount (%):</label>
+                <input
+                    type="number"
+                    id="discount"
+                    placeholder="Enter discount percentage"
+                    onChange={(e) => setDiscountPercentage(Number(e.target.value))}
+                    value={discountPercentage}
+                />
+            </div>
+            <h4>Net Amount: LKR {(quotation.reduce((sum, item) => sum + item.total, 0) * (1 - discountPercentage / 100)).toFixed(2)}</h4>
+        </div>
+
+        {/* Quotation Footer */}
+        <div className="quotation-footer">
+            <button onClick={handleDeleteQuotation}>Clear</button>
+            <button onClick={handleSaveQuotation}>Save Quotation</button>
+            <button onClick={handleCustomerDetails}>Proceed to Customer</button>
+            <button onClick={handleFinalView}>Final View</button>
+        </div>
+    </div>
+</div>
+
+
+
         </div>
     );
 };

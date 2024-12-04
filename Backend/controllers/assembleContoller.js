@@ -1,8 +1,12 @@
 
 
 // Create a new assemble item (with image buffer)
+<<<<<<< HEAD:Backend/controllers/assembleContoller.js
 
 const Assemble = require('../models/assembleModels');
+=======
+//k
+>>>>>>> 25c64cc0d123cc25a7f3680eec5bbaec931feafa:Backend/controllers/assembleController.js
 const createAssemble = async (req, res) => {
     try {
         const { itemName, itemNumber, stockAvailable, price, specification } = req.body;
