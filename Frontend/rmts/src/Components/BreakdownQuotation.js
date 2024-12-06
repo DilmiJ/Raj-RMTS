@@ -1,11 +1,214 @@
-// BreakdownQuotation.js
-import React from 'react';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { QRCodeCanvas } from "qrcode.react"; // Corrected import
+import "../css/BreakdownQutation.css";
 
 const BreakdownQuotation = () => {
+  const [items, setItems] = useState([]);
+  const [newItem, setNewItem] = useState({ name: "", quantity: "" });
+  const [oldItems, setOldItems] = useState([]);
+  const [newOldItem, setNewOldItem] = useState({ name: "", quantity: "" });
+  const [repairDate, setRepairDate] = useState("");
+  const [systemDetails, setSystemDetails] = useState("");
+  const [jobDoneBy, setJobDoneBy] = useState({ name: "", number: "" });
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [qrData, setQrData] = useState(""); // Empty QR code data initially
+
+  useEffect(() => {
+    // Optionally, load existing data if needed or just generate QR code initially
+    setQrData(generateQRCodeData()); // Generate QR code data dynamically
+  }, [invoiceNumber, repairDate, systemDetails, jobDoneBy, items, oldItems]); // Trigger when any change occurs
+
+  const generateQRCodeData = () => {
+    // Create readable strings for the new and old items
+    const itemsData = items.map(item => `${item.name} (Qty: ${item.quantity})`).join(", ");
+    const oldItemsData = oldItems.map(item => `${item.name} (Qty: ${item.quantity})`).join(", ");
+  
+    // Construct the data string for the QR code
+    return `
+      Invoice Number: ${invoiceNumber}
+      Repair Date: ${repairDate}
+      System Details: ${systemDetails}
+      Job Done By: ${jobDoneBy.name} - ${jobDoneBy.number}
+      New Items: ${itemsData}
+      Old Items: ${oldItemsData}
+      What Happened to the System: ${systemDetails}
+    `;
+  };
+  
+  
+
+  const handleAddItem = () => {
+    if (newItem.name && newItem.quantity) {
+      setItems([...items, newItem]);
+      setNewItem({ name: "", quantity: "" });
+    }
+  };
+
+  const handleAddOldItem = () => {
+    if (newOldItem.name && newOldItem.quantity) {
+      setOldItems([...oldItems, newOldItem]);
+      setNewOldItem({ name: "", quantity: "" });
+    }
+  };
+
+  const handleSubmit = async () => {
+    const quotationData = {
+      invoiceNumber,
+      repairDate,
+      systemDetails,
+      jobDoneBy,
+      newItems: items,
+      oldItems: oldItems,
+    };
+
+    try {
+      const response = await axios.post("http://localhost:5000/api/save-quotation", quotationData);
+      alert("Quotation saved successfully");
+
+      // Set QR data dynamically after submitting
+      setQrData(generateQRCodeData());
+    } catch (error) {
+      alert("Error saving quotation: " + error.message);
+    }
+  };
+
   return (
-    <div>
-      <h1>Breakdown Quotation</h1>
-      <p>This is the Breakdown Quotation page.</p>
+    <div className="container">
+      <div className="left-section">
+        <h1>Breakdown Quotation</h1>
+        <div>
+          <label>Invoice Number:</label>
+          <input
+            type="text"
+            value={invoiceNumber}
+            onChange={(e) => setInvoiceNumber(e.target.value)}
+          />
+        </div>
+        <div>
+          <h2>Add New Items</h2>
+          <label>Item Name:</label>
+          <input
+            type="text"
+            value={newItem.name}
+            onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+          />
+          <label>Quantity:</label>
+          <input
+            type="number"
+            value={newItem.quantity}
+            onChange={(e) =>
+              setNewItem({ ...newItem, quantity: e.target.value })
+            }
+          />
+          <button onClick={handleAddItem}>Add Item</button>
+        </div>
+        <div>
+          <h2>Add Old Quotation Items</h2>
+          <label>Item Name:</label>
+          <input
+            type="text"
+            value={newOldItem.name}
+            onChange={(e) =>
+              setNewOldItem({ ...newOldItem, name: e.target.value })
+            }
+          />
+          <label>Quantity:</label>
+          <input
+            type="number"
+            value={newOldItem.quantity}
+            onChange={(e) =>
+              setNewOldItem({ ...newOldItem, quantity: e.target.value })
+            }
+          />
+          <button onClick={handleAddOldItem}>Add Old Item</button>
+        </div>
+        <div>
+          <label>Repair Date:</label>
+          <input
+            type="date"
+            value={repairDate}
+            onChange={(e) => setRepairDate(e.target.value)}
+          />
+        </div>
+        <div>
+          <label>What Happened to the System:</label>
+          <textarea
+            value={systemDetails}
+            onChange={(e) => setSystemDetails(e.target.value)}
+            rows="3"
+          />
+        </div>
+        <div>
+          <h2>Job Done By</h2>
+          <label>Name:</label>
+          <input
+            type="text"
+            value={jobDoneBy.name}
+            onChange={(e) =>
+              setJobDoneBy({ ...jobDoneBy, name: e.target.value })
+            }
+          />
+          <label>Contact Number:</label>
+          <input
+            type="text"
+            value={jobDoneBy.number}
+            onChange={(e) =>
+              setJobDoneBy({ ...jobDoneBy, number: e.target.value })
+            }
+          />
+        </div>
+        <button onClick={handleSubmit}>Submit Quotation</button>
+      </div>
+
+      <div className="right-section">
+        <h2>Quotation Summary</h2>
+        <p>
+          <strong>Invoice Number:</strong> {invoiceNumber}
+        </p>
+        <p>
+          <strong>Repair Date:</strong> {repairDate}
+        </p>
+        <p>
+          <strong>System Details:</strong> {systemDetails}
+        </p>
+        <p>
+          <strong>Job Done By:</strong> {jobDoneBy.name} - {jobDoneBy.number}
+        </p>
+        <h3>Newly Added Items</h3>
+        {items.length > 0 ? (
+          <ul>
+            {items.map((item, index) => (
+              <li key={index}>
+                {item.name} - Quantity: {item.quantity}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No new items added yet.</p>
+        )}
+        <h3>Old Quotation Items</h3>
+        {oldItems.length > 0 ? (
+          <ul>
+            {oldItems.map((item, index) => (
+              <li key={index}>
+                {item.name} - Quantity: {item.quantity}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No old items added yet.</p>
+        )}
+
+        {/* QR Code Section */}
+        {qrData && (
+          <div>
+            <h3>QR Code for Quotation</h3>
+            <QRCodeCanvas value={qrData} size={100} />
+            <p>Scan this QR code to view the quotation details.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
