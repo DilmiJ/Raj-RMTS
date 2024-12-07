@@ -21,6 +21,7 @@ app.use('/api/customer-details', customerRoutes); // Use customer routes
 app.use('/api/quotations', quotationRoutes);
 app.use('/api/items', itemRoutes);  // For items CRUD
 app.use('/api/jobs', jobRoutes);    // For jobs CRUD
+app.use("/api", quotationRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { 
