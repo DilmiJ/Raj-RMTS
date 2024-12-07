@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-<<<<<<< HEAD
+// Define the schema for Item
 const itemSchema = new mongoose.Schema({
   itemName: {
     type: String,
@@ -24,14 +24,7 @@ const itemSchema = new mongoose.Schema({
   }
 });
 
+// Create a model based on the schema
 const Item = mongoose.model('Item', itemSchema);
-=======
-const ItemSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    price: { type: Number, required: true },
-});
-
-const Item = mongoose.model('Item', ItemSchema);
->>>>>>> 25c64cc0d123cc25a7f3680eec5bbaec931feafa
 
 module.exports = Item;

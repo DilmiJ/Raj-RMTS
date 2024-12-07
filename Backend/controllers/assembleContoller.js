@@ -1,12 +1,6 @@
-
+const Assemble = require('../models/assembleModels');
 
 // Create a new assemble item (with image buffer)
-<<<<<<< HEAD:Backend/controllers/assembleContoller.js
-
-const Assemble = require('../models/assembleModels');
-=======
-//k
->>>>>>> 25c64cc0d123cc25a7f3680eec5bbaec931feafa:Backend/controllers/assembleController.js
 const createAssemble = async (req, res) => {
     try {
         const { itemName, itemNumber, stockAvailable, price, specification } = req.body;
@@ -35,7 +29,6 @@ const createAssemble = async (req, res) => {
     }
 };
 
-
 // Get all assemble items
 const getAssembles = async (req, res) => {
     try {
@@ -43,7 +36,7 @@ const getAssembles = async (req, res) => {
         res.status(200).json(assembles);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error fetching assemble items' });
+        res.status(500).json({ message: 'Error fetching assemble items', error: error.message });
     }
 };
 
@@ -59,7 +52,7 @@ const getImage = async (req, res) => {
         res.send(image.data);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error fetching image' });
+        res.status(500).json({ message: 'Error fetching image', error: error.message });
     }
 };
 
@@ -85,7 +78,7 @@ const updateAssemble = async (req, res) => {
         res.status(200).json(updatedAssemble);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error updating assemble item' });
+        res.status(500).json({ message: 'Error updating assemble item', error: error.message });
     }
 };
 
@@ -101,7 +94,7 @@ const deleteAssemble = async (req, res) => {
         res.status(200).json({ message: 'Item deleted successfully' });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error deleting assemble item' });
+        res.status(500).json({ message: 'Error deleting assemble item', error: error.message });
     }
 };
 

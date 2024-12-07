@@ -8,26 +8,27 @@
     flex-direction: column;
     align-items: center;
     font-family: 'Poppins', sans-serif;
-  }
-  
-  /* Title and Intro */
-  .service-title {
+    overflow: hidden;
+}
+
+/* Title and Intro */
+.service-title {
     font-size: 2.2rem;
     font-weight: bold;
     margin-bottom: 1rem;
     color: #ff9800;
     text-shadow: 1px 1px 4px #000;
-  }
-  
-  .service-intro {
+}
+
+.service-intro {
     font-size: 1.1rem;
     margin-bottom: 1.5rem;
     color: #cccccc;
     text-align: center;
-  }
-  
-  /* Form Styling */
-  .service-form {
+}
+
+/* Form Styling */
+.service-form {
     background: #222;
     padding: 1.2rem;
     border-radius: 12px;
@@ -35,26 +36,27 @@
     width: 100%;
     max-width: 320px;
     transition: 0.3s ease-in-out;
-  }
-  
-  .service-form:hover {
+}
+
+.service-form:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.9);
-  }
-  
-  .form-group {
-    margin-bottom: 1rem;
-  }
-  
-  label {
+}
+
+/* Form Group */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
     display: block;
     margin-bottom: 0.4rem;
     font-size: 0.9rem;
     font-weight: 600;
     color: #ff9800;
-  }
-  
-  input {
+}
+
+input {
     width: 100%;
     padding: 0.7rem;
     border: 2px solid #555;
@@ -64,15 +66,30 @@
     color: #fff;
     outline: none;
     transition: 0.3s ease;
-  }
-  
-  input:focus {
+}
+
+input:focus {
     border-color: #ff9800;
     box-shadow: 0 0 6px #ff9800;
-  }
-  
-  /* Submit Button */
-  .submit-button {
+}
+
+/* Form Group Label with Icon */
+.form-group label {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #ff9800;
+    margin-bottom: 0.4rem;
+}
+
+.form-group label .icon {
+    margin-right: 8px;
+    font-size: 1.2rem;
+}
+
+/* Submit Button */
+.submit-button {
     background: #ff9800;
     color: #fff;
     border: none;
@@ -84,37 +101,98 @@
     width: 100%;
     font-weight: 600;
     box-shadow: 0 3px 8px rgba(255, 152, 0, 0.4);
-  }
-  
-  .submit-button:hover {
+}
+
+.submit-button:hover {
     background: #ffb347;
     box-shadow: 0 6px 14px rgba(255, 152, 0, 0.6);
     transform: translateY(-3px);
-  }
-  
-  /* Small Decorative Touches */
-  input::placeholder {
+}
+
+/* Small Decorative Touches */
+input::placeholder {
     color: #aaa;
     font-style: italic;
-  }
-  
-  footer {
+}
+
+footer {
     margin-top: 1.5rem;
     font-size: 0.8rem;
     color: #666;
-  }
-  /* Form Group Label with Icon */
-.form-group label {
+}
+
+/* Search Bar */
+.search-container {
+    margin-top: 2rem;
     display: flex;
     align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 320px;
+}
+
+.search-container input {
+    width: 70%;
+    padding: 0.7rem;
+    border: 2px solid #555;
+    border-radius: 8px;
     font-size: 0.9rem;
-    font-weight: 600;
-    color: #ff9800;
-    margin-bottom: 0.4rem;
-  }
-  
-  .form-group label .icon {
-    margin-right: 8px;
+    background: #333;
+    color: #fff;
+    outline: none;
+    margin-right: 0.5rem;
+}
+
+.search-container button {
+    background: #ff9800;
+    color: #fff;
+    padding: 0.7rem 1rem;
+    border: none;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.search-container button:hover {
+    background: #ffb347;
+    box-shadow: 0 6px 14px rgba(255, 152, 0, 0.6);
+}
+
+/* Services List */
+.services-list {
+    margin-top: 3rem;
+    width: 100%;
+    max-width: 320px;
+}
+
+.service-item {
+    background: #444;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.service-item p {
     font-size: 1rem;
-  }
-  
+    margin-bottom: 0.5rem;
+}
+
+.service-item button {
+    background: #ff9800;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border: none;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    margin-top: 0.5rem;
+}
+
+.service-item button:hover {
+    background: #ffb347;
+    box-shadow: 0 6px 14px rgba(255, 152, 0, 0.6);
+    transform: translateY(-2px);
+}
