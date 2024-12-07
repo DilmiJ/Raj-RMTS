@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { QRCodeCanvas } from "qrcode.react"; // Corrected import
+import { QRCodeCanvas } from "qrcode.react";
 import "../css/BreakdownQutation.css";
 
 const BreakdownQuotation = () => {
@@ -14,17 +14,11 @@ const BreakdownQuotation = () => {
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [qrData, setQrData] = useState(""); // Empty QR code data initially
 
-  useEffect(() => {
-    // Optionally, load existing data if needed or just generate QR code initially
-    setQrData(generateQRCodeData()); // Generate QR code data dynamically
-  }, [invoiceNumber, repairDate, systemDetails, jobDoneBy, items, oldItems]); // Trigger when any change occurs
-
+  // Function to generate the QR code data
   const generateQRCodeData = () => {
-    // Create readable strings for the new and old items
     const itemsData = items.map(item => `${item.name} (Qty: ${item.quantity})`).join(", ");
     const oldItemsData = oldItems.map(item => `${item.name} (Qty: ${item.quantity})`).join(", ");
   
-    // Construct the data string for the QR code
     return `
       Invoice Number: ${invoiceNumber}
       Repair Date: ${repairDate}
@@ -35,8 +29,11 @@ const BreakdownQuotation = () => {
       What Happened to the System: ${systemDetails}
     `;
   };
-  
-  
+
+  useEffect(() => {
+    // Set QR code data dynamically whenever relevant data changes
+    setQrData(generateQRCodeData());
+  }, [invoiceNumber, repairDate, systemDetails, jobDoneBy, items, oldItems]); // Trigger when any change occurs
 
   const handleAddItem = () => {
     if (newItem.name && newItem.quantity) {
@@ -65,9 +62,7 @@ const BreakdownQuotation = () => {
     try {
       const response = await axios.post("http://localhost:5000/api/save-quotation", quotationData);
       alert("Quotation saved successfully");
-
-      // Set QR data dynamically after submitting
-      setQrData(generateQRCodeData());
+      setQrData(generateQRCodeData()); // Update the QR code after saving
     } catch (error) {
       alert("Error saving quotation: " + error.message);
     }
@@ -162,74 +157,73 @@ const BreakdownQuotation = () => {
       </div>
 
       <div className="right-section">
-  <h2>Quotation Summary</h2>
-  <p>
-    <strong>Invoice Number:</strong> {invoiceNumber}
-  </p>
-  <p>
-    <strong>Repair Date:</strong> {repairDate}
-  </p>
-  <p>
-    <strong>System Details:</strong> {systemDetails}
-  </p>
-  <p>
-    <strong>Job Done By:</strong> {jobDoneBy.name} - {jobDoneBy.number}
-  </p>
+        <h2>Quotation Summary</h2>
+        <p>
+          <strong>Invoice Number:</strong> {invoiceNumber}
+        </p>
+        <p>
+          <strong>Repair Date:</strong> {repairDate}
+        </p>
+        <p>
+          <strong>System Details:</strong> {systemDetails}
+        </p>
+        <p>
+          <strong>Job Done By:</strong> {jobDoneBy.name} - {jobDoneBy.number}
+        </p>
 
-  <h3>Newly Added Items</h3>
-  {items.length > 0 ? (
-    <table className="items-table">
-      <thead>
-        <tr>
-          <th>Item Name</th>
-          <th>Quantity</th>
-        </tr>
-      </thead>
-      <tbody>
-        {items.map((item, index) => (
-          <tr key={index}>
-            <td>{item.name}</td>
-            <td>{item.quantity}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  ) : (
-    <p>No new items added yet.</p>
-  )}
+        <h3>Newly Added Items</h3>
+        {items.length > 0 ? (
+          <table className="items-table">
+            <thead>
+              <tr>
+                <th>Item Name</th>
+                <th>Quantity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.name}</td>
+                  <td>{item.quantity}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No new items added yet.</p>
+        )}
 
-  <h3>Old Quotation Items</h3>
-  {oldItems.length > 0 ? (
-    <table className="items-table">
-      <thead>
-        <tr>
-          <th>Item Name</th>
-          <th>Quantity</th>
-        </tr>
-      </thead>
-      <tbody>
-        {oldItems.map((item, index) => (
-          <tr key={index}>
-            <td>{item.name}</td>
-            <td>{item.quantity}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  ) : (
-    <p>No old items added yet.</p>
-  )}
+        <h3>Old Quotation Items</h3>
+        {oldItems.length > 0 ? (
+          <table className="items-table">
+            <thead>
+              <tr>
+                <th>Item Name</th>
+                <th>Quantity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {oldItems.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.name}</td>
+                  <td>{item.quantity}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No old items added yet.</p>
+        )}
 
-  {/* QR Code Section */}
-  {qrData && (
-    <div>
-      <h3>QR Code for Quotation</h3>
-      <QRCodeCanvas value={qrData} size={100} />
-      <p>Scan this QR code to view the quotation details.</p>
-    </div>
-  )}
-</div>
-
+        {/* QR Code Section */}
+        {qrData && (
+          <div>
+            <h3>QR Code for Quotation</h3>
+            <QRCodeCanvas value={qrData} size={100} />
+            <p>Scan this QR code to view the quotation details.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
