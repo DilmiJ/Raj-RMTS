@@ -13,6 +13,6 @@ router.get('/', getAssembles);
 //router.get('/:id', getAssembleById);
 router.put('/:id', updateAssemble);
 router.delete('/:id', deleteAssemble);
-router.post('/quotation', createQuotation);
+//router.post('/quotation', createQuotation);
 
 module.exports = router;
