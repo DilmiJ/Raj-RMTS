@@ -1,16 +1,19 @@
-const Assemble = require('../models/assembleModels');
+const Assemble = require('../models/assembleModel');
 
 // Create a new assemble item (with image buffer)
 const createAssemble = async (req, res) => {
     try {
         const { itemName, itemNumber, stockAvailable, price, specification } = req.body;
-        const images = req.files.map((file) => ({
-            data: file.buffer,  // Store image as buffer
-            contentType: file.mimetype,
-        }));
 
-        console.log('Request Body:', req.body);
-        console.log('Request Files:', req.files);
+        // Validate required fields
+        if (!itemName || !itemNumber || !price) {
+            return res.status(400).json({ message: 'Required fields are missing' });
+        }
+
+        const images = req.files?.map((file) => ({
+            data: file.buffer, // Store image as buffer
+            contentType: file.mimetype,
+        })) || []; // Handle cases where no images are provided
 
         const newAssemble = new Assemble({
             itemName,
@@ -36,7 +39,7 @@ const getAssembles = async (req, res) => {
         res.status(200).json(assembles);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error fetching assemble items', error: error.message });
+        res.status(500).json({ message: 'Error fetching assemble items' });
     }
 };
 
@@ -52,7 +55,7 @@ const getImage = async (req, res) => {
         res.send(image.data);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error fetching image', error: error.message });
+        res.status(500).json({ message: 'Error fetching image' });
     }
 };
 
@@ -60,15 +63,26 @@ const getImage = async (req, res) => {
 const updateAssemble = async (req, res) => {
     try {
         const { itemName, itemNumber, stockAvailable, price, specification } = req.body;
-        const images = req.files.map((file) => ({
+
+        const images = req.files?.map((file) => ({
             data: file.buffer,
             contentType: file.mimetype,
-        }));
+        })) || undefined; // Retain existing images if no new files are provided
+
+        const updateFields = {
+            itemName,
+            itemNumber,
+            stockAvailable,
+            price,
+            specification,
+        };
+
+        if (images) updateFields.images = images;
 
         const updatedAssemble = await Assemble.findByIdAndUpdate(
             req.params.id,
-            { itemName, itemNumber, stockAvailable, price, specification, images },
-            { new: true }
+            updateFields,
+            { new: true } // Return the updated record
         );
 
         if (!updatedAssemble) {
@@ -78,7 +92,7 @@ const updateAssemble = async (req, res) => {
         res.status(200).json(updatedAssemble);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error updating assemble item', error: error.message });
+        res.status(500).json({ message: 'Error updating assemble item' });
     }
 };
 
@@ -91,10 +105,13 @@ const deleteAssemble = async (req, res) => {
             return res.status(404).json({ message: 'Item not found' });
         }
 
-        res.status(200).json({ message: 'Item deleted successfully' });
+        res.status(200).json({
+            message: 'Item deleted successfully',
+            deletedAssemble, // Optionally return deleted item data
+        });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error deleting assemble item', error: error.message });
+        res.status(500).json({ message: 'Error deleting assemble item' });
     }
 };
 
