@@ -1,19 +1,17 @@
 const Assemble = require('../models/assembleModel');
 
 // Create a new assemble item (with image buffer)
+//k
 const createAssemble = async (req, res) => {
     try {
         const { itemName, itemNumber, stockAvailable, price, specification } = req.body;
-
-        // Validate required fields
-        if (!itemName || !itemNumber || !price) {
-            return res.status(400).json({ message: 'Required fields are missing' });
-        }
-
-        const images = req.files?.map((file) => ({
-            data: file.buffer, // Store image as buffer
+        const images = req.files.map((file) => ({
+            data: file.buffer,  // Store image as buffer
             contentType: file.mimetype,
-        })) || []; // Handle cases where no images are provided
+        }));
+
+        console.log('Request Body:', req.body);
+        console.log('Request Files:', req.files);
 
         const newAssemble = new Assemble({
             itemName,
@@ -31,6 +29,7 @@ const createAssemble = async (req, res) => {
         res.status(500).json({ message: 'Error creating assemble item', error: error.message });
     }
 };
+
 
 // Get all assemble items
 const getAssembles = async (req, res) => {
@@ -63,26 +62,15 @@ const getImage = async (req, res) => {
 const updateAssemble = async (req, res) => {
     try {
         const { itemName, itemNumber, stockAvailable, price, specification } = req.body;
-
-        const images = req.files?.map((file) => ({
+        const images = req.files.map((file) => ({
             data: file.buffer,
             contentType: file.mimetype,
-        })) || undefined; // Retain existing images if no new files are provided
-
-        const updateFields = {
-            itemName,
-            itemNumber,
-            stockAvailable,
-            price,
-            specification,
-        };
-
-        if (images) updateFields.images = images;
+        }));
 
         const updatedAssemble = await Assemble.findByIdAndUpdate(
             req.params.id,
-            updateFields,
-            { new: true } // Return the updated record
+            { itemName, itemNumber, stockAvailable, price, specification, images },
+            { new: true }
         );
 
         if (!updatedAssemble) {
@@ -105,10 +93,7 @@ const deleteAssemble = async (req, res) => {
             return res.status(404).json({ message: 'Item not found' });
         }
 
-        res.status(200).json({
-            message: 'Item deleted successfully',
-            deletedAssemble, // Optionally return deleted item data
-        });
+        res.status(200).json({ message: 'Item deleted successfully' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error deleting assemble item' });

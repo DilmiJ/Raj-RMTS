@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const quotationSchema = new mongoose.Schema({
+const QuotationSchema = new mongoose.Schema({
     quotationNumber: { 
         type: String, 
         required: true, 
@@ -17,6 +17,6 @@ const quotationSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-const Quotation = mongoose.model('Quotation', quotationSchema);
+const Quotation = mongoose.model('Quotation', QuotationSchema);
 
 module.exports = Quotation;

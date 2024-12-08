@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../css/JobSelectionPart.css';
 
 const JobSelectionPart = () => {
-  const [activeTab, setActiveTab] = useState('jobDetails');
+  const [activeTab, setActiveTab] = useState(null);
   const [items, setItems] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [newItem, setNewItem] = useState({ name: '', price: '' });
@@ -18,70 +17,69 @@ const JobSelectionPart = () => {
     hours: '',
   });
 
-  // Fetch initial data
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (url, setter) => {
       try {
-        const [itemsResponse, jobsResponse] = await Promise.all([
-          axios.get('http://localhost:5000/api/items'),
-          axios.get('http://localhost:5000/api/jobs'),
-        ]);
-        setItems(itemsResponse.data);
-        setJobs(jobsResponse.data);
+        const response = await axios.get(url);
+        setter(response.data);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error(`Error fetching data from ${url}:`, error);
       }
     };
 
-    fetchData();
+    fetchData('http://localhost:5000/api/items', setItems);
+    fetchData('http://localhost:5000/api/jobs', setJobs);
   }, []);
 
-  // Add a new item
+
+  console.log('Updating job with data:', newJob);
+
+
   const handleAddItem = async () => {
     if (!newItem.name || !newItem.price) {
       alert('Please fill out both fields for the new item.');
       return;
     }
-
     try {
       const response = await axios.post('http://localhost:5000/api/items', newItem);
       setItems([...items, response.data]);
       setNewItem({ name: '', price: '' });
     } catch (error) {
       console.error('Error adding item:', error);
-      alert('Failed to add the item. Please try again.');
     }
   };
 
-  // Update an existing item
-  const handleUpdateItem = async () => {
-    if (!editItem.name || !editItem.price) {
-      alert('Please fill out both fields for updating the item.');
+ 
+
+
+
+  const handleUpdateJob = async () => {
+    if (Object.values(newJob).some((value) => !value)) {
+      alert('Please fill out all fields to update the job.');
       return;
     }
-
+  
     try {
-      const response = await axios.put(`http://localhost:5000/api/items/${editItem.id}`, editItem);
-      setItems(items.map((item) => (item._id === editItem.id ? response.data : item)));
-      setEditItem({ id: '', name: '', price: '' });
+      const response = await axios.put(`http://localhost:5000/api/jobs/${newJob.id}`, newJob);
+      
+      // Update the jobs array with the updated job
+      setJobs((prevJobs) =>
+        prevJobs.map((job) => (job._id === newJob.id ? response.data : job))
+      );
+  
+      // Clear the form
+      setNewJob({ userId: '', jobNumber: '', duration: '', date: '', hours: '', id: '' });
+      alert('Job updated successfully!');
     } catch (error) {
-      console.error('Error updating item:', error);
-      alert('Failed to update the item. Please try again.');
+      console.error('Error updating job:', error);
+      alert('Failed to update the job. Please try again.');
     }
   };
+  
+  
 
-  // Delete an item
-  const handleDeleteItem = async (id) => {
-    try {
-      await axios.delete(`http://localhost:5000/api/items/${id}`);
-      setItems(items.filter((item) => item._id !== id));
-    } catch (error) {
-      console.error('Error deleting item:', error);
-      alert('Failed to delete the item. Please try again.');
-    }
-  };
 
-  // View item details
+// View details
   const handleViewDetails = async (id) => {
     try {
       const response = await axios.get(`http://localhost:5000/api/items/${id}`);
@@ -91,57 +89,11 @@ const JobSelectionPart = () => {
     }
   };
 
-  // Add a new job
-  const handleAddJob = async () => {
-    if (Object.values(newJob).some((value) => !value)) {
-      alert('Please fill out all fields for the new job.');
-      return;
-    }
 
-    try {
-      const response = await axios.post('http://localhost:5000/api/jobs', newJob);
-      setJobs([...jobs, response.data]);
-      setNewJob({ userId: '', jobNumber: '', duration: '', date: '', hours: '' });
-    } catch (error) {
-      console.error('Error adding job:', error);
-      alert('Failed to add the job. Please try again.');
-    }
-  };
-
-  // Update a job
-  const handleUpdateJob = async () => {
-    if (!newJob.id || Object.values(newJob).some((value) => !value)) {
-      alert('Please fill out all fields to update the job.');
-      return;
-    }
-
-    try {
-      const response = await axios.put(`http://localhost:5000/api/jobs/${newJob.id}`, newJob);
-      setJobs(jobs.map((job) => (job._id === newJob.id ? response.data : job)));
-      setNewJob({ userId: '', jobNumber: '', duration: '', date: '', hours: '' });
-      alert('Job updated successfully!');
-    } catch (error) {
-      console.error('Error updating job:', error);
-      alert('Failed to update the job. Please try again.');
-    }
-  };
-
-  // Delete a job
-  const handleDeleteJob = async (id) => {
-    try {
-      await axios.delete(`http://localhost:5000/api/jobs/${id}`);
-      setJobs(jobs.filter((job) => job._id !== id));
-    } catch (error) {
-      console.error('Error deleting job:', error);
-      alert('Failed to delete the job. Please try again.');
-    }
-  };
-
-  // View job details
   const handleViewJob = (job) => {
-    setViewDetailsItem(job);
+    setViewDetailsItem(job); // Display job details
   };
-
+  
   const setEditJob = (job) => {
     setNewJob({
       userId: job.userId,
@@ -149,11 +101,60 @@ const JobSelectionPart = () => {
       duration: job.duration,
       date: job.date,
       hours: job.hours,
-      id: job._id,
+      id: job._id, // Set the job ID for later reference in update
     });
   };
 
- return (
+
+  const handleUpdateItem = async () => {
+    if (!editItem.name || !editItem.price) {
+      alert('Please fill out both fields for updating the item.');
+      return;
+    }
+    try {
+      const response = await axios.put(`http://localhost:5000/api/items/${editItem.id}`, editItem);
+      setItems(items.map((item) => (item._id === editItem.id ? response.data : item)));
+      setEditItem({ id: '', name: '', price: '' });
+    } catch (error) {
+      console.error('Error updating item:', error);
+    }
+  };
+
+  const handleDeleteItem = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/items/${id}`);
+      setItems(items.filter((item) => item._id !== id));
+    } catch (error) {
+      console.error('Error deleting item:', error);
+    }
+  };
+
+  const handleAddJob = async () => {
+    if (Object.values(newJob).some((value) => !value)) {
+      alert('Please fill out all fields for the new job.');
+      return;
+    }
+    try {
+      const response = await axios.post('http://localhost:5000/api/jobs', newJob);
+      setJobs([...jobs, response.data]);
+      setNewJob({ userId: '', jobNumber: '', duration: '', date: '', hours: '' });
+    } catch (error) {
+      console.error('Error adding job:', error);
+    }
+  };
+
+ 
+
+  const handleDeleteJob = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/jobs/${id}`);
+      setJobs(jobs.filter((job) => job._id !== id));
+    } catch (error) {
+      console.error('Error deleting job:', error);
+    }
+  };
+
+  return (
     <div className="job-selection-part">
       <h1>Job Selection Part</h1>
       <div className="button-group">
