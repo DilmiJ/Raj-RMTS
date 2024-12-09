@@ -8,6 +8,19 @@ const RepairingForm = () => {
   const [items, setItems] = useState('');
   const [quantity, setQuantity] = useState(1);
 
+
+
+  
+
+
+
+
+
+
+
+
+
+
   // This function generates a unique invoice number
   const generateInvoiceNumber = () => {
     const uniqueNumber = 'RMTSB-' + Math.floor(Math.random() * 1000000);
@@ -15,11 +28,25 @@ const RepairingForm = () => {
   };
 
   // Example submit function
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle the form submission logic
-    console.log({ invoiceNumber, problem, solution, items, quantity });
+    try {
+      const response = await fetch('http://localhost:5000/api/repairing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invoiceNumber, problem, solution, items, quantity }),
+      });
+      const result = await response.json();
+      if (response.ok) {
+        alert('Repairing record saved successfully!');
+      } else {
+        alert('Error: ' + result.message);
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
   };
+  
 
   // Ensure only one space between items
   const handleItemChange = (e) => {
