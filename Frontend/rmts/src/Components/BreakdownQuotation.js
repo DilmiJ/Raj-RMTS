@@ -12,6 +12,7 @@ const BreakdownQuotation = () => {
   const [systemDetails, setSystemDetails] = useState("");
   const [jobDoneBy, setJobDoneBy] = useState({ name: "", number: "" });
   const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [quotationNumber, setQuotationNumber] = useState("");
   const [qrData, setQrData] = useState(""); // Empty QR code data initially
 
   // Function to generate the QR code data
@@ -19,15 +20,13 @@ const BreakdownQuotation = () => {
     const itemsData = items.map(item => `${item.name} (Qty: ${item.quantity})`).join(", ");
     const oldItemsData = oldItems.map(item => `${item.name} (Qty: ${item.quantity})`).join(", ");
   
-    return `
-      Invoice Number: ${invoiceNumber}
-      Repair Date: ${repairDate}
-      System Details: ${systemDetails}
-      Job Done By: ${jobDoneBy.name} - ${jobDoneBy.number}
-      New Items: ${itemsData}
-      Old Items: ${oldItemsData}
-      What Happened to the System: ${systemDetails}
-    `;
+    return `Invoice Number: ${invoiceNumber}
+            Repair Date: ${repairDate}
+            System Details: ${systemDetails}
+            Job Done By: ${jobDoneBy.name} - ${jobDoneBy.number}
+            New Items: ${itemsData}
+            Old Items: ${oldItemsData}
+            What Happened to the System: ${systemDetails}`;
   };
 
   useEffect(() => {
@@ -51,6 +50,7 @@ const BreakdownQuotation = () => {
 
   const handleSubmit = async () => {
     const quotationData = {
+      quotationNumber,
       invoiceNumber,
       repairDate,
       systemDetails,
@@ -60,7 +60,7 @@ const BreakdownQuotation = () => {
     };
 
     try {
-      const response = await axios.post("http://localhost:5000/api/save-quotation", quotationData);
+      const response = await axios.post("http://localhost:5000/api/breakdown/save-quotation", quotationData);
       alert("Quotation saved successfully");
       setQrData(generateQRCodeData()); // Update the QR code after saving
     } catch (error) {
@@ -72,6 +72,14 @@ const BreakdownQuotation = () => {
     <div className="container">
       <div className="left-section">
         <h1>Breakdown Quotation</h1>
+        <div>
+          <label>Quotation Number:</label>
+          <input
+            type="text"
+            value={quotationNumber}
+            onChange={(e) => setQuotationNumber(e.target.value)}
+          />
+        </div>
         <div>
           <label>Invoice Number:</label>
           <input
@@ -158,71 +166,52 @@ const BreakdownQuotation = () => {
 
       <div className="right-section">
         <h2>Quotation Summary</h2>
-        <p>
-          <strong>Invoice Number:</strong> {invoiceNumber}
-        </p>
-        <p>
-          <strong>Repair Date:</strong> {repairDate}
-        </p>
-        <p>
-          <strong>System Details:</strong> {systemDetails}
-        </p>
-        <p>
-          <strong>Job Done By:</strong> {jobDoneBy.name} - {jobDoneBy.number}
-        </p>
+        <p><strong>Invoice Number:</strong> {invoiceNumber}</p>
+        <p><strong>Repair Date:</strong> {repairDate}</p>
+        <p><strong>System Details:</strong> {systemDetails}</p>
+        <p><strong>Job Done By:</strong> {jobDoneBy.name} - {jobDoneBy.number}</p>
 
         <h3>Newly Added Items</h3>
-        {items.length > 0 ? (
-          <table className="items-table">
-            <thead>
-              <tr>
-                <th>Item Name</th>
-                <th>Quantity</th>
+        <table className="items-table">
+          <thead>
+            <tr>
+              <th>Item Name</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, index) => (
+              <tr key={index}>
+                <td>{item.name}</td>
+                <td>{item.quantity}</td>
               </tr>
-            </thead>
-            <tbody>
-              {items.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.name}</td>
-                  <td>{item.quantity}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p>No new items added yet.</p>
-        )}
+            ))}
+          </tbody>
+        </table>
 
         <h3>Old Quotation Items</h3>
-        {oldItems.length > 0 ? (
-          <table className="items-table">
-            <thead>
-              <tr>
-                <th>Item Name</th>
-                <th>Quantity</th>
+        <table className="items-table">
+          <thead>
+            <tr>
+              <th>Item Name</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            {oldItems.map((item, index) => (
+              <tr key={index}>
+                <td>{item.name}</td>
+                <td>{item.quantity}</td>
               </tr>
-            </thead>
-            <tbody>
-              {oldItems.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.name}</td>
-                  <td>{item.quantity}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p>No old items added yet.</p>
-        )}
+            ))}
+          </tbody>
+        </table>
 
         {/* QR Code Section */}
-        {qrData && (
-          <div>
-            <h3>QR Code for Quotation</h3>
-            <QRCodeCanvas value={qrData} size={100} />
-            <p>Scan this QR code to view the quotation details.</p>
-          </div>
-        )}
+        <div>
+          <h3>QR Code for Quotation</h3>
+          <QRCodeCanvas value={qrData} />
+        </div>
       </div>
     </div>
   );

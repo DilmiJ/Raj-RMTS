@@ -1,58 +1,30 @@
 const mongoose = require('mongoose');
 
-// Breakdown schema definition
+// Define the schema for the quotation
 const breakdownSchema = new mongoose.Schema({
-    invoiceNumber: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    repairDate: {
-        type: Date,
-        required: true,
-    },
-    systemDetails: {
-        type: String,
-        required: true,
-    },
-    jobDoneBy: {
-        name: {
-            type: String,
-            required: true,
-        },
-        number: {
-            type: String,
-            required: true,
-        },
-    },
-    newlyAddedItems: [
-        {
-            name: {
-                type: String,
-                required: true,
-            },
-            quantity: {
-                type: Number,
-                required: true,
-                min: 1,
-            },
-        },
-    ],
-    oldQuotationItems: [
-        {
-            name: {
-                type: String,
-                required: true,
-            },
-            quantity: {
-                type: Number,
-                required: true,
-                min: 1,
-            },
-        },
-    ],
+  quotationNumber: { type: String, required: true },
+  invoiceNumber: { type: String, required: true },
+  repairDate: { type: Date, required: true },
+  systemDetails: { type: String, required: true },
+  jobDoneBy: {
+    name: { type: String, required: true },
+    number: { type: String, required: true },
+  },
+  newItems: [
+    {
+      name: { type: String, required: true },
+      quantity: { type: Number, required: true },
+    }
+  ],
+  oldItems: [
+    {
+      name: { type: String, required: true },
+      quantity: { type: Number, required: true },
+    }
+  ]
 });
 
-const Breakdown = mongoose.model('Breakdown', breakdownSchema);
+// Check if the model is already defined, if not define it
+const Quotation = mongoose.models.Quotation || mongoose.model('Quotation', breakdownSchema);
 
-module.exports = Breakdown;
+module.exports = Quotation;

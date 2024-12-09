@@ -7,8 +7,8 @@ const customerRoutes = require('./routers/customerRoutes'); // Adjust path if ne
 const quotationRoutes= require('./routers/quotationRoutes');
 const itemRoutes = require('./routers/itemRoutes');
 const jobRoutes = require('./routers/jobRoutes');
-const breakroutes = require('./routers/breakdownRouter');
-const assembleController = require('../controllers/assembleController');
+const breakdownRoutes = require('./routers/breakdownRouter');
+//const assembleController = require('../controllers/assembleController');
 
 
 
@@ -24,8 +24,8 @@ app.use('/api/assemble', assembleRoutes); // Use assemble routes
 app.use('/api/customer-details', customerRoutes); // Use customer routes
 app.use('/api/quotations', quotationRoutes);
 app.use('/api/items', itemRoutes);  // For items CRUD
-app.use('/api/jobs', jobRoutes);    // For jobs CRUD
-app.use('/api', breakroutes);
+app.use('/api/jobs', jobRoutes);  
+app.use("/api/breakdown", breakdownRoutes);  
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { 
     useNewUrlParser: true, 

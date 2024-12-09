@@ -1,12 +1,25 @@
-const Quotation = require('../models/breakdownModel');
+const Quotation = require("../models/breakdownModel");
 
-// Save a new quotation
 exports.saveQuotation = async (req, res) => {
-  const { invoiceNumber, repairDate, systemDetails, jobDoneBy, newItems, oldItems } = req.body;
+  const {
+    quotationNumber,
+    invoiceNumber,
+    repairDate,
+    systemDetails,
+    jobDoneBy,
+    newItems,
+    oldItems,
+  } = req.body;
 
   try {
-    // Create a new quotation document
+    // Check if all necessary fields are present
+    if (!quotationNumber || !invoiceNumber || !repairDate || !systemDetails || !jobDoneBy || !newItems || !oldItems) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+
+    // Create a new quotation instance
     const newQuotation = new Quotation({
+      quotationNumber,
       invoiceNumber,
       repairDate,
       systemDetails,
@@ -17,8 +30,15 @@ exports.saveQuotation = async (req, res) => {
 
     // Save to the database
     await newQuotation.save();
-    res.status(201).json({ message: 'Quotation saved successfully', quotation: newQuotation });
+    res.status(201).json({
+      message: "Quotation saved successfully",
+      quotation: newQuotation,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to save quotation', error: error.message });
+    console.error("Error saving quotation:", error.message); // Log detailed error
+    res.status(500).json({
+      message: "Failed to save quotation",
+      error: error.message,
+    });
   }
 };

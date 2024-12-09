@@ -1,8 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const assembleController = require('../controllers/assembleController');
-
-const { createAssemble, getAssembles, updateAssemble, deleteAssemble, getImage } = require('../controllers/assembleController');
+const { createAssemble, getAssembles, updateAssemble, deleteAssemble, getImage } = require('../controllers/assembleContoller');
 //k
 const router = express.Router();
 
