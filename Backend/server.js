@@ -8,6 +8,9 @@ const quotationRoutes= require('./routers/quotationRoutes');
 const itemRoutes = require('./routers/itemRoutes');
 const jobRoutes = require('./routers/jobRoutes');
 const breakdownRoutes = require('./routers/breakdownRouter');
+const serviceRoutes = require('./routers/serviceRoutes');
+const repairingRoutes = require('./routers/repairing');
+
 //const assembleController = require('../controllers/assembleController');
 
 
@@ -26,6 +29,9 @@ app.use('/api/quotations', quotationRoutes);
 app.use('/api/items', itemRoutes);  // For items CRUD
 app.use('/api/jobs', jobRoutes);  
 app.use("/api/breakdown", breakdownRoutes);  
+app.use('/api/services', serviceRoutes);
+app.use('/api/repairing', repairingRoutes);
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { 
     useNewUrlParser: true, 

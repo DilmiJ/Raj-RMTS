@@ -22,11 +22,11 @@ const ServicePage = () => {
     e.preventDefault();
     try {
       const res = await axios.post('http://localhost:5000/api/services/create', formData);
-      console.log('Form Data Submitted:', res.data);
-      alert('Form Submitted Successfully!');
+      alert('Service created successfully!');
       fetchServices(); // Refresh the list of services
     } catch (err) {
-      console.error(err);
+      console.error('Error submitting form:', err.response.data);
+      alert('Failed to submit service');
     }
   };
 
@@ -36,7 +36,7 @@ const ServicePage = () => {
       const res = await axios.get('http://localhost:5000/api/services');
       setServices(res.data);
     } catch (err) {
-      console.error(err);
+      console.error('Error fetching services:', err);
     }
   };
 
@@ -59,7 +59,7 @@ const ServicePage = () => {
       alert('Service deleted successfully!');
       fetchServices(); // Refresh the service list
     } catch (err) {
-      console.error(err);
+      console.error('Error deleting service:', err);
     }
   };
 
@@ -72,9 +72,7 @@ const ServicePage = () => {
     <div className="service-page-container">
       <form className="service-form" onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="invoiceNumber">
-            <span className="icon">📄</span> Invoice Number:
-          </label>
+          <label htmlFor="invoiceNumber">Invoice Number:</label>
           <input
             type="text"
             id="invoiceNumber"
@@ -86,9 +84,7 @@ const ServicePage = () => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="date">
-            <span className="icon">📅</span> Date:
-          </label>
+          <label htmlFor="date">Date:</label>
           <input
             type="date"
             id="date"
@@ -99,9 +95,7 @@ const ServicePage = () => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="jobDonePerson">
-            <span className="icon">👤</span> Job Done By:
-          </label>
+          <label htmlFor="jobDonePerson">Job Done By:</label>
           <input
             type="text"
             id="jobDonePerson"
@@ -115,7 +109,6 @@ const ServicePage = () => {
         <button type="submit" className="submit-button">Submit</button>
       </form>
 
-      {/* Search bar */}
       <div className="search-container">
         <input
           type="text"
@@ -126,7 +119,6 @@ const ServicePage = () => {
         <button onClick={handleSearch}>Search</button>
       </div>
 
-      {/* Services list */}
       <div className="services-list">
         {services.map(service => (
           <div key={service._id} className="service-item">
