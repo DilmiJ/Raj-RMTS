@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../css/JobSelectionPart.css';
+import '../css/MonitorView.css';
 
 const JobSelectionPart = () => {
   const [activeTab, setActiveTab] = useState(null);
